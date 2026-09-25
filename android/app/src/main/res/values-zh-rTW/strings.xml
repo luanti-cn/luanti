@@ -6,6 +6,6 @@
     <string name="unzip_notification_description">不到1分鐘…</string>
     <string name="ime_dialog_done">完畢</string>
     <string name="no_web_browser">未找到任何網頁瀏覽器</string>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="unzip_notification_title">載入Luanti中</string>
 </resources>

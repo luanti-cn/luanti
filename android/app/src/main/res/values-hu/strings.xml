@@ -6,7 +6,7 @@
     <string name="unzip_notification_title">A Luanti épp betölt</string>
     <string name="ime_dialog_done">Kész</string>
     <string name="no_web_browser">Nem található webböngésző</string>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="unzip_notification_description">Kevesebb, mint 1 perc…</string>
     <string name="game_notification_title">A Luanti jelenleg fut</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="loading">読み込み中…</string>
     <string name="ime_dialog_done">完了</string>
     <string name="unzip_notification_title">Luantiを読み込んでいます</string>

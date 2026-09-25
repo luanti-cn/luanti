@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="loading">Laddar…</string>
     <string name="unzip_notification_description">Mindre än 1 minut…</string>
     <string name="ime_dialog_done">Klar</string>

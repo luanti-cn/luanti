@@ -5,7 +5,7 @@
     <string name="no_web_browser">No se encontró ningún navegador web</string>
     <string name="loading">Cargando…</string>
     <string name="notification_channel_name">Notificación General</string>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="notification_channel_description">Notificaciones de Luanti</string>
     <string name="unzip_notification_title">Cargando Luanti</string>
     <string name="game_notification_title">Luanti se está ejecutando</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="loading">Se încarcă…</string>
     <string name="notification_channel_name">Notificare generală</string>
     <string name="notification_channel_description">Notificări de la Luanti</string>

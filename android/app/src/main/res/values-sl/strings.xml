@@ -4,7 +4,7 @@
     <string name="notification_channel_name">Glavno obvestilo</string>
     <string name="loading">Nalaganje …</string>
     <string name="unzip_notification_description">Manj kot 1 minuta …</string>
-    <string name="label">Luanti</string>
+    <string name="label">LuantiCN</string>
     <string name="notification_channel_description">Obvestilo od Luantija</string>
     <string name="ime_dialog_done">Končano</string>
     <string name="unzip_notification_title">Nalaganje Luantija</string>
