@@ -30,7 +30,7 @@
 extern int main(int argc, char *argv[]);
 
 extern "C" JNIEXPORT void JNICALL
-Java_net_minetest_minetest_GameActivity_saveSettings(JNIEnv* env, jobject /* this */) {
+Java_cn_luanti_luanti_GameActivity_saveSettings(JNIEnv* env, jobject /* this */) {
 	if (!g_settings_path.empty())
 		g_settings->updateConfigFile(g_settings_path.c_str());
 }
