@@ -78,7 +78,7 @@ void set_default_settings()
 	settings->setDefault("language", "");
 	settings->setDefault("name", "");
 	settings->setDefault("bind_address", "");
-	settings->setDefault("serverlist_url", "https://servers.luanti.org");
+	settings->setDefault("serverlist_url", "https://api.luanti.cn/serverlists");
 
 	// Client
 	settings->setDefault("address", "");
@@ -414,9 +414,14 @@ void set_default_settings()
 	settings->setDefault("chat_font_size", "0"); // Default "font_size"
 
 	// ContentDB
-	settings->setDefault("contentdb_url", "https://content.luanti.org");
+	settings->setDefault("contentdb_url", "https://api.luanti.cn");
+	settings->setDefault("contentdb_templink", "true");
 	settings->setDefault("contentdb_enable_updates_indicator", "true");
 	settings->setDefault("contentdb_max_concurrent_downloads", "3");
+
+	// Cloud sync
+	settings->setDefault("cloud_sync_url", "https://api.luanti.cn");
+	settings->setDefault("cloud_site_url", "https://luanti.cn");
 
 #ifdef __ANDROID__
 	settings->setDefault("contentdb_flag_blacklist", "nonfree, android_default");
@@ -425,7 +430,7 @@ void set_default_settings()
 #endif
 
 #if ENABLE_UPDATE_CHECKER
-	settings->setDefault("update_information_url", "https://www.luanti.org/release_info.json");
+	settings->setDefault("update_information_url", "https://api.luanti.cn/release_info.json");
 #else
 	settings->setDefault("update_information_url", "");
 #endif
@@ -509,7 +514,8 @@ void set_default_settings()
 	settings->setDefault("num_emerge_threads", "0");
 	settings->setDefault("secure.enable_security", "true");
 	settings->setDefault("secure.trusted_mods", "");
-	settings->setDefault("secure.http_mods", "");
+	// 随 fork 分发的 cloud_skins mod 需要HTTP API(云端皮肤),默认信任
+	settings->setDefault("secure.http_mods", "cloud_skins");
 
 	// Physics
 	settings->setDefault("movement_acceleration_default", "3");

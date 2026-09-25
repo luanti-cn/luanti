@@ -288,6 +288,8 @@ if(WIN32)
 	# Windows
 	if(MSVC) # MSVC Specifics
 		list(APPEND PLATFORM_LIBS dbghelp.lib)
+		# Source files are UTF-8 (breaks on Chinese Windows code page 936 otherwise)
+		add_compile_options(/utf-8)
 		# Surpress some useless warnings
 		add_compile_options(/W1)
 		add_compile_definitions(
@@ -664,6 +666,9 @@ if(BUILD_CLIENT)
 		add_library(${PROJECT_NAME} SHARED)
 	else()
 		add_executable(${PROJECT_NAME})
+		if(WIN32)
+			set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "LuantiCN")
+		endif()
 	endif()
 
 
@@ -682,7 +687,7 @@ if(BUILD_CLIENT)
 			MACOSX_BUNDLE TRUE
 			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_BINARY_DIR}/Info.plist"
 			RESOURCE "${client_RESOURCES}"
-			XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.luanti.luanti"
+			XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "cn.luanti.luanti"
 			XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES"
 			XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
 			XCODE_ATTRIBUTE_SKIP_INSTALL "NO"

@@ -13,6 +13,13 @@
 #include <list>
 #include <optional>
 #include <algorithm>
+#include <unordered_set>
+
+// Luanti CN fork: mods shipped with the engine that are enabled by default
+// for every world, unless the world explicitly sets `load_mod_<name> = false`.
+static const std::unordered_set<std::string> default_enabled_mods = {
+	"cloud_skins",
+};
 
 std::string ModConfiguration::getUnsatisfiedModsError() const
 {
@@ -158,6 +165,11 @@ void ModConfiguration::addModsFromConfig(
 				} else {
 					candidates[pair->first].emplace_back(mod.virtual_path);
 				}
+			} else if (default_enabled_mods.count(mod.name) != 0
+					&& (!conf.exists("load_mod_" + mod.name)
+						|| is_yes(conf.get("load_mod_" + mod.name)))) {
+				// fork-shipped mods default to enabled for every world
+				addon_mods.push_back(mod);
 			} else {
 				conf.remove("load_mod_" + mod.name);
 			}

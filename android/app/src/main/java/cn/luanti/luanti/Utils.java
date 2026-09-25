@@ -1,4 +1,4 @@
-package net.minetest.minetest;
+package cn.luanti.luanti;
 
 import android.content.Context;
 import android.util.Log;

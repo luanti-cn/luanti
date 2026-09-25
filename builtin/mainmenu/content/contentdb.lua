@@ -40,24 +40,60 @@ local function get_download_url(package, reason)
 	return ret
 end
 
+-- Presigned direct CDN link, falls back to get_download_url if unavailable
+local function get_temp_link_url(package)
+	local base_url = core.settings:get("contentdb_url")
+	return base_url .. ("/packages/%s/releases/%d/temp-link/?format=json"):format(
+			package.url_part, package.release)
+end
+
 
 local function download_and_extract(param)
 	local package = param.package
 
-	local filename = core.get_temp_path(true)
-	if filename == "" or not core.download_file(param.url, filename) then
-		core.log("error", "Downloading " .. dump(param.url) .. " failed")
-		return {
-			msg = fgettext_ne("Failed to download \"$1\"", package.title)
-		}
+	local urls = {}
+	if param.templink then
+		local http = core.get_http_api()
+		local response = http.fetch_sync({
+			url = param.templink,
+			timeout = 10,
+			quiet = true,
+		})
+		local data = response.succeeded and core.parse_json(response.data) or nil
+		if type(data) == "table" and type(data.url) == "string" then
+			urls[#urls + 1] = data.url
+		end
+	end
+	urls[#urls + 1] = param.url
+
+	local extract_failed = false
+	for _, url in ipairs(urls) do
+		local filename = core.get_temp_path(true)
+		if filename == "" then
+			break
+		end
+		if not core.download_file(url, filename) then
+			os.remove(filename)
+		else
+			local tempfolder = core.get_temp_path()
+			if tempfolder ~= "" and not core.extract_zip(filename, tempfolder) then
+				tempfolder = ""
+			end
+			os.remove(filename)
+			if tempfolder ~= "" then
+				return {
+					path = tempfolder
+				}
+			end
+
+			-- downloaded fine but the archive is broken:
+			-- retrying another mirror won't help
+			extract_failed = true
+			break
+		end
 	end
 
-	local tempfolder = core.get_temp_path()
-	if tempfolder ~= "" and not core.extract_zip(filename, tempfolder) then
-		tempfolder = ""
-	end
-	os.remove(filename)
-	if tempfolder == "" then
+	if extract_failed then
 		return {
 			msg = fgettext_ne("Failed to extract \"$1\" " ..
 					"(insufficient disk space, unsupported file type or broken archive)",
@@ -65,8 +101,9 @@ local function download_and_extract(param)
 		}
 	end
 
+	core.log("error", "Downloading " .. dump(param.url) .. " failed")
 	return {
-		path = tempfolder
+		msg = fgettext_ne("Failed to download \"$1\"", package.title)
 	}
 end
 
@@ -76,6 +113,9 @@ local function start_install(package, reason)
 		package = package,
 		url = get_download_url(package, reason),
 	}
+	if core.settings:get_bool("contentdb_templink", true) then
+		params.templink = get_temp_link_url(package)
+	end
 
 	contentdb.number_downloading = contentdb.number_downloading + 1
 

@@ -495,6 +495,42 @@ local function search_server_list(input, tabdata)
 	set_selected_server(nil)
 end
 
+local function join_game(fields, te_port_number, tabdata)
+	gamedata.mode       = "join"
+	gamedata.playername = fields.te_name
+	gamedata.password   = fields.te_pwd
+	gamedata.address    = fields.te_address
+	gamedata.port       = te_port_number
+
+	local enable_split_login_register = core.settings:get_bool("enable_split_login_register")
+	gamedata.allow_login_or_register = enable_split_login_register and "login" or "any"
+	gamedata.selected_world = 0
+
+	local idx = core.get_table_index("servers")
+	local server = idx and tabdata.lookup[idx]
+
+	if server and server.address == gamedata.address and
+			server.port == gamedata.port then
+
+		serverlistmgr.add_favorite(server)
+
+		if not is_server_protocol_compat_or_error(
+					server.proto_min, server.proto_max) then
+			return
+		end
+	else
+		serverlistmgr.add_favorite({
+			address = gamedata.address,
+			port = gamedata.port,
+		})
+	end
+
+	core.settings:set("address",     gamedata.address)
+	core.settings:set("remote_port", gamedata.port)
+
+	core.start()
+end
+
 local function main_button_handler(tabview, fields, name, tabdata)
 	if fields.te_name then
 		gamedata.playername = fields.te_name
@@ -509,6 +545,26 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			if event.type == "DCL" then
 				if not is_server_protocol_compat_or_error(
 							server.proto_min, server.proto_max) then
+					return true
+				end
+
+				if cloud_join and cloud_store.info and cloud_join.handle(
+						tabview, server.address, server.port, server, function()
+					gamedata.mode       = "join"
+					gamedata.address    = server.address
+					gamedata.port       = server.port
+					gamedata.playername = fields.te_name
+					gamedata.selected_world = 0
+
+					if fields.te_pwd then
+						gamedata.password = fields.te_pwd
+					end
+
+					if gamedata.address and gamedata.port then
+						set_selected_server(server)
+						core.start()
+					end
+				end) then
 					return true
 				end
 
@@ -596,39 +652,15 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	local te_port_number = tonumber(fields.te_port)
 
 	if (fields.btn_mp_login or fields.key_enter) and host_filled then
-		gamedata.mode       = "join"
-		gamedata.playername = fields.te_name
-		gamedata.password   = fields.te_pwd
-		gamedata.address    = fields.te_address
-		gamedata.port       = te_port_number
-
-		local enable_split_login_register = core.settings:get_bool("enable_split_login_register")
-		gamedata.allow_login_or_register = enable_split_login_register and "login" or "any"
-		gamedata.selected_world = 0
-
-		local idx = core.get_table_index("servers")
-		local server = idx and tabdata.lookup[idx]
-
-		if server and server.address == gamedata.address and
-				server.port == gamedata.port then
-
-			serverlistmgr.add_favorite(server)
-
-			if not is_server_protocol_compat_or_error(
-						server.proto_min, server.proto_max) then
-				return true
-			end
-		else
-			serverlistmgr.add_favorite({
-				address = gamedata.address,
-				port = gamedata.port,
-			})
+		if cloud_join and cloud_store.info and cloud_join.handle(
+				tabview, fields.te_address, te_port_number, find_selected_server(),
+				function()
+					join_game(fields, te_port_number, tabdata)
+				end) then
+			return true
 		end
 
-		core.settings:set("address",     gamedata.address)
-		core.settings:set("remote_port", gamedata.port)
-
-		core.start()
+		join_game(fields, te_port_number, tabdata)
 		return true
 	end
 

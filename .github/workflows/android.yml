@@ -38,6 +38,24 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends gettext
+    - name: Configure signing
+      env:
+        ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      run: |
+        if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+          echo "No signing secrets configured; building unsigned artifacts."
+          exit 0
+        fi
+        echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
+        cat > android/local.properties <<EOF
+        keystore=keystore.jks
+        keystore.password=$ANDROID_KEYSTORE_PASSWORD
+        key=$ANDROID_KEY_ALIAS
+        key.password=$ANDROID_KEY_PASSWORD
+        EOF
     - name: Set up JDK 17
       uses: actions/setup-java@v5
       with:
@@ -52,25 +70,25 @@ jobs:
     - name: Save AAB artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Luanti-release.aab
+        name: LuantiCN-release.aab
         path: android/app/build/outputs/bundle/release/app-release.aab
     - name: Save armeabi artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Luanti-armeabi-v7a.apk
-        path: android/app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk
+        name: LuantiCN-armeabi-v7a.apk
+        path: android/app/build/outputs/apk/release/app-armeabi-v7a-release*.apk
     - name: Save arm64 artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Luanti-arm64-v8a.apk
-        path: android/app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+        name: LuantiCN-arm64-v8a.apk
+        path: android/app/build/outputs/apk/release/app-arm64-v8a-release*.apk
     - name: Save x86 artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Luanti-x86.apk
-        path: android/app/build/outputs/apk/release/app-x86-release-unsigned.apk
+        name: LuantiCN-x86.apk
+        path: android/app/build/outputs/apk/release/app-x86-release*.apk
     - name: Save x86_64 artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Luanti-x86_64.apk
-        path: android/app/build/outputs/apk/release/app-x86_64-release-unsigned.apk
+        name: LuantiCN-x86_64.apk
+        path: android/app/build/outputs/apk/release/app-x86_64-release*.apk

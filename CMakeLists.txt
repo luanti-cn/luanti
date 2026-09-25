@@ -5,7 +5,7 @@ endif()
 
 # This can be read from ${PROJECT_NAME} after project() is called
 project(luanti)
-set(PROJECT_NAME_CAPITALIZED "Luanti")
+set(PROJECT_NAME_CAPITALIZED "LuantiCN")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -264,8 +264,8 @@ install(FILES "minetest.conf.example" DESTINATION "${EXAMPLE_CONF_DIR}")
 
 if(UNIX AND NOT APPLE)
 	install(FILES "doc/luanti.6" "doc/luantiserver.6" DESTINATION "${MANDIR}/man6")
-	install(FILES "misc/org.luanti.luanti.desktop" DESTINATION "${XDG_APPS_DIR}")
-	install(FILES "misc/org.luanti.luanti.metainfo.xml" DESTINATION "${METAINFODIR}")
+	install(FILES "misc/cn.luanti.luanti.desktop" DESTINATION "${XDG_APPS_DIR}")
+	install(FILES "misc/cn.luanti.luanti.metainfo.xml" DESTINATION "${METAINFODIR}")
 	install(FILES "misc/luanti.svg" DESTINATION "${ICONDIR}/hicolor/scalable/apps")
 	install(FILES "misc/luanti-xorg-icon-128.png"
 		DESTINATION "${ICONDIR}/hicolor/128x128/apps"
@@ -310,6 +310,7 @@ add_subdirectory(src)
 
 # Package generation
 
+set(CPACK_PACKAGE_NAME "LuantiCN")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A free open-source voxel game engine with easy modding and game creation.")
 set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})

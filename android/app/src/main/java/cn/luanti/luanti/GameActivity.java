@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License along
 with this program; if not, see <https://www.gnu.org/licenses/>.
 */
 
-package net.minetest.minetest;
+package cn.luanti.luanti;
 
 import org.libsdl.app.SDLActivity;
 
@@ -232,7 +232,7 @@ public class GameActivity extends SDLActivity {
 			return;
 		}
 
-		Uri fileUri = FileProvider.getUriForFile(this, "net.minetest.minetest.fileprovider", file);
+		Uri fileUri = FileProvider.getUriForFile(this, "cn.luanti.luanti.fileprovider", file);
 
 		Intent intent = new Intent(Intent.ACTION_SEND, fileUri);
 		intent.setDataAndType(fileUri, getContentResolver().getType(fileUri));

@@ -1,4 +1,4 @@
-package net.minetest.minetest;
+package cn.luanti.luanti;
 
 import static android.provider.DocumentsContract.Document;
 import static android.provider.DocumentsContract.Root;

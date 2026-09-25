@@ -3,7 +3,7 @@ version: 1
 AppDir:
   path: AppDir
   app_info:
-    id: org.luanti.luanti
+    id: cn.luanti.luanti
     name: Luanti
     icon: luanti
     version: !ENV ${VERSION}

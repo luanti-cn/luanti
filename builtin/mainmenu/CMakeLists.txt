@@ -2,6 +2,11 @@ add_subdirectory(content)
 
 set(BUILTIN_MAINMENU_SRCS
 	mainmenu/async_event.lua
+	mainmenu/cloud/api.lua
+	mainmenu/cloud/dlg_join.lua
+	mainmenu/cloud/dlg_pair.lua
+	mainmenu/cloud/store.lua
+	mainmenu/cloud/tab_cloud.lua
 	mainmenu/common.lua
 	mainmenu/credits.json
 	mainmenu/dlg_clients_list.lua

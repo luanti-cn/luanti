@@ -17,7 +17,7 @@ You should have received a copy of the GNU Lesser General Public License along
 with this program; if not, see <https://www.gnu.org/licenses/>.
 */
 
-package net.minetest.minetest;
+package cn.luanti.luanti;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
@@ -39,7 +39,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
-import static net.minetest.minetest.UnzipService.*;
+import static cn.luanti.luanti.UnzipService.*;
 
 public class MainActivity extends AppCompatActivity {
 	public static final String NOTIFICATION_CHANNEL_ID = "Minetest channel";
