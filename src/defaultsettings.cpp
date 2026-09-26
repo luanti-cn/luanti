@@ -512,7 +512,6 @@ void set_default_settings()
 	settings->setDefault("emergequeue_limit_diskonly", "150");
 	settings->setDefault("emergequeue_limit_generate", "150");
 	settings->setDefault("num_emerge_threads", "0");
-	settings->setDefault("secure.enable_security", "true");
 	settings->setDefault("secure.trusted_mods", "");
 	// 随 fork 分发的 cloud_skins mod 需要HTTP API(云端皮肤),默认信任
 	settings->setDefault("secure.http_mods", "cloud_skins");
