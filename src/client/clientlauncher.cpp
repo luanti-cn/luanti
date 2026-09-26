@@ -3,6 +3,7 @@
 // Copyright (C) 2010-2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 #include "gui/mainmenumanager.h"
+#include "cloud/cloud_service.h"
 #include "clouds.h"
 #include "gui/touchcontrols.h"
 #include "filesys.h"
@@ -424,6 +425,10 @@ bool ClientLauncher::launch_game(GameErrorData &errordata, GameStartData &start_
 	 * Show the GUI menu
 	 */
 	if (!skip_main_menu) {
+		// Drop any leftover cloud room tunnel from the previous session
+		// (must not run after the menu started a join, hence here)
+		cloud::CloudService::get().joinCancel();
+
 		// Initialize menu data
 		MainMenuData menudata(errordata);
 		(GameClientData &)menudata = start_data;

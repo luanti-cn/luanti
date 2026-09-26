@@ -720,6 +720,13 @@ void initializePaths()
 		path_share = execpath;
 		path_user  = execpath;
 	}
+
+	// allow overriding the user path (e.g. to run a second instance with a
+	// separate account for multiplayer testing)
+	if (auto user_path_env = getUserPathEnvVar()) {
+		path_user = std::move(user_path_env.value());
+		infostream << "Using LUANTI_USER_PATH: " << path_user << std::endl;
+	}
 	path_cache = path_user + DIR_DELIM "cache";
 
 #else

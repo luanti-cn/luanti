@@ -14,6 +14,7 @@
 #include "client/sound.h"
 #include "clientmap.h"
 #include "clientmedia.h" // For clientMediaUpdateCacheCopy
+#include "cloud/cloud_service.h"
 #include "config.h"
 #include "content_cao.h"
 #include "content/subgames.h"
@@ -547,6 +548,18 @@ void Game::run()
 
 		processQueues();
 
+		// cloud service: DM / friends / room tunnels
+		cloud::CloudService::get().step();
+		pollCloudEvents();
+		if (client && client->getState() == LC_Ready) {
+			Address server_addr = client->getServerAddress();
+			if (!server_addr.isLocalhost()) {
+				cloud::CloudService::get().setPresenceAddress(
+						client->getAddressName() + ":" +
+						std::to_string(server_addr.getPort()));
+			}
+		}
+
 		m_game_ui->clearInfoText();
 
 		updateProfilers(stats, draw_times, dtime);
@@ -609,6 +622,10 @@ void Game::run()
 
 void Game::shutdown()
 {
+	// stop cloud hosting / room tunnel
+	cloud::CloudService::get().stopHosting();
+	cloud::CloudService::get().setPresenceAddress("");
+
 	// Delete text and menus first
 	m_game_ui->clearText();
 	m_game_formspec.reset();
@@ -801,6 +818,11 @@ bool Game::createServer(GameStartData &start_data)
 	}
 
 	start_thread->rethrow();
+
+	if (success && !simple_singleplayer_mode &&
+			g_settings->getBool("cloud_host_game")) {
+		cloud::CloudService::get().startHosting(start_data.socket_port);
+	}
 
 	return success;
 }
@@ -2518,6 +2540,52 @@ void Game::processClientEvents(CameraOrientation *cam)
 		FATAL_ERROR_IF(event->type >= CLIENTEVENT_MAX, "Invalid clientevent type");
 		const ClientEventHandler& evHandler = clientEventHandler[event->type];
 		(this->*evHandler.handler)(event.get(), cam);
+	}
+}
+
+void Game::pollCloudEvents()
+{
+	cloud::CloudService::Event ev;
+	while (cloud::CloudService::get().popEvent(ev)) {
+		std::wstring line;
+		if (ev.type == "dm.new") {
+			line = L"\x1b(c@#FD0)[私聊] " + utf8_to_wide(
+					ev.data["fromDisplay"].asString()) + L": " +
+					utf8_to_wide(ev.data["body"].asString()) +
+					L" \x1b(c@#888)(回复: /dm " +
+					utf8_to_wide(ev.data["from"].asString()) + L" 消息)";
+		} else if (ev.type == "friend.request") {
+			line = L"\x1b(c@#FD0)[好友] " + utf8_to_wide(
+					ev.data["fromDisplay"].asString()) +
+					L" 请求加你为好友,请到网站处理";
+		} else if (ev.type == "friend.accepted") {
+			line = L"\x1b(c@#FD0)[好友] 已与 " + utf8_to_wide(
+					ev.data["displayName"].asString()) + L" 成为好友";
+		} else if (ev.type == "host.ready") {
+			line = L"\x1b(c@#FD0)[联机] 好友可通过房间码 " +
+					utf8_to_wide(ev.data["roomCode"].asString()) +
+					L" 加入你的房间";
+		} else if (ev.type == "party.error") {
+			line = L"\x1b(c@#F00)[组队] " + (ev.data.isString() ?
+					utf8_to_wide(ev.data.asString()) :
+					utf8_to_wide(ev.data["message"].asString()));
+		} else if (ev.type == "error") {
+			line = L"\x1b(c@#F00)[云端] " + utf8_to_wide(
+					ev.data["message"].asString());
+		}
+		if (!line.empty())
+			chat_backend->addMessage(L"", line);
+	}
+
+	// announce the room code once the backend accepted our registration
+	Json::Value hs = cloud::CloudService::get().hostStatusJson();
+	if (hs["active"].asBool()) {
+		std::string code = hs["roomCode"].asString();
+		if (!code.empty() && code != m_announced_room_code) {
+			m_announced_room_code = code;
+			chat_backend->addMessage(L"", L"\x1b(c@#FD0)[联机] 好友可通过房间码 " +
+					utf8_to_wide(code) + L" 加入你的房间");
+		}
 	}
 }
 

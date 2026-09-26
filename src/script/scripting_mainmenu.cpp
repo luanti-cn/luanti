@@ -4,7 +4,9 @@
 
 #include "scripting_mainmenu.h"
 #include "cpp_api/s_internal.h"
+#include "cloud/cloud_service.h"
 #include "lua_api/l_base.h"
+#include "lua_api/l_cloud.h"
 #include "lua_api/l_http.h"
 #include "lua_api/l_mainmenu.h"
 #include "lua_api/l_mainmenu_sound.h"
@@ -58,6 +60,7 @@ void MainMenuScripting::initializeModApi(lua_State *L, int top)
 	ModApiUtil::Initialize(L, top);
 	ModApiMainMenuSound::Initialize(L, top);
 	ModApiHttp::Initialize(L, top);
+	ModApiCloud::Initialize(L, top);
 
 	asyncEngine.registerStateInitializer(registerLuaClasses);
 	asyncEngine.registerStateInitializer(ModApiMenuCommon::InitializeAsync);
@@ -109,7 +112,23 @@ bool MainMenuScripting::checkPathAccess(const std::string &abs_path, bool write_
 
 void MainMenuScripting::step()
 {
+	// pump cloud REST results / WS events / room timers (main menu frames)
+	cloud::CloudService::get().step();
+
 	asyncEngine.step(getStack());
+
+	// per-frame hook for the cloud social UI (friends/DM/party)
+	lua_State *L = getStack();
+	lua_getglobal(L, "cloud_on_step");
+	if (lua_isfunction(L, -1)) {
+		if (lua_pcall(L, 0, 0, 0) != 0) {
+			warningstream << "cloud_on_step error: "
+					<< lua_tostring(L, -1) << std::endl;
+			lua_pop(L, 1);
+		}
+	} else {
+		lua_pop(L, 1); // not a function (undefined or other value)
+	}
 }
 
 u32 MainMenuScripting::queueAsync(std::string &&serialized_func,

@@ -18,6 +18,7 @@
 #include "client/texturepaths.h"
 #include "client/texturesource.h"
 #include "camera.h"
+#include "cloud/cloud_service.h"
 #include "filesys.h"
 #include "game.h"
 #include "gettext.h"
@@ -1779,6 +1780,25 @@ void Client::typeChatMessage(const std::wstring &message)
 
 	auto message_utf8 = wide_to_utf8(message);
 	infostream << "Typed chat message: \"" << message_utf8 << "\"" << std::endl;
+
+	// Cloud quick reply: /dm <friend> <message> (never sent to the server)
+	if (message_utf8.rfind("/dm ", 0) == 0) {
+		std::string rest = trim(message_utf8.substr(4));
+		auto sp = rest.find(' ');
+		if (sp != std::string::npos) {
+			std::string to = trim(rest.substr(0, sp));
+			std::string body = trim(rest.substr(sp + 1));
+			if (!to.empty() && !body.empty()) {
+				cloud::CloudService::get().sendDM(to, body);
+				pushToChatQueue(new ChatMessage(utf8_to_wide(
+						"\x1b(c@#FD0)[私聊 -> " + to + "] " + body)));
+				return;
+			}
+		}
+		pushToChatQueue(new ChatMessage(utf8_to_wide(
+				"\x1b(c@#888)用法: /dm <好友名> <消息>")));
+		return;
+	}
 
 	// If message was consumed by script API, don't send it to server
 	if (m_mods_loaded && m_script->on_sending_message(message_utf8))

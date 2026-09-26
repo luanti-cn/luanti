@@ -232,6 +232,13 @@ local function get_formspec(tabview, name, tabdata)
 				"container[0.375,0.375]" ..
 				"checkbox[0,"..y..";cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
 				dump(core.settings:get_bool("server_announce")) .. "]"
+		y = y + yo
+		if cloud_store.info then
+			retval = retval ..
+				"checkbox[0,"..y..";cb_cloud_host;" ..
+				fgettext("Allow friends to join (cloud)") .. ";" ..
+				dump(core.settings:get_bool("cloud_host_game")) .. "]"
+		end
 
 		-- Reset y so that the text fields always start at the same position,
 		-- regardless of whether some of the checkboxes are hidden.
@@ -344,6 +351,11 @@ local function main_button_handler(this, fields, name, tabdata)
 		local selected = core.get_textlist_index("srv_worlds")
 		menu_worldmt(selected, "server_announce", fields["cb_server_announce"])
 
+		return true
+	end
+
+	if fields["cb_cloud_host"] then
+		core.settings:set("cloud_host_game", fields["cb_cloud_host"])
 		return true
 	end
 

@@ -1,0 +1,10 @@
+set(cloud_SRCS
+	${CMAKE_CURRENT_SOURCE_DIR}/cloud_config.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/cloud_http_client.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/cloud_service.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/host_room_controller.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/join_controller.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/realtime_client.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/stun_client.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/tunnel_manager.cpp
+	PARENT_SCOPE)

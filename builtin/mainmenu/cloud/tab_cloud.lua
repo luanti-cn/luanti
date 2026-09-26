@@ -101,6 +101,7 @@ return {
 			if tabdata.confirm_logout then
 				tabdata.confirm_logout = nil
 				cloud_store.clear()
+				core.cloud_reload_auth() -- notify the C++ cloud service
 			else
 				tabdata.confirm_logout = true
 			end

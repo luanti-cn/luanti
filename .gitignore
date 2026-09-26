@@ -143,3 +143,5 @@ lib/irrlichtmt
 # Generated mod storage database
 client/mod_storage.sqlite
 /client/cloud/auth.json
+/userdata2
+/dumpwalk.obj

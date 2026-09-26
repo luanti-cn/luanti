@@ -134,7 +134,8 @@ local function on_join_clicked(this, fields)
 	this.data.error = nil
 	ui.update()
 
-	cloud_api.provision(this.data.address, character and character.id or nil,
+	local vault_address = this.data.vault_address or this.data.address
+	cloud_api.provision(vault_address, character and character.id or nil,
 			function(result)
 		if not result.success then
 			this.data.busy = false
@@ -214,7 +215,7 @@ local function join_buttonhandler(this, fields)
 	return false
 end
 
-function cloud_join.handle(tabview, address, port, server, manual)
+function cloud_join.handle(tabview, address, port, server, manual, vault_address)
 	if not address or address == "" or not port then
 		return false
 	end
@@ -231,6 +232,7 @@ function cloud_join.handle(tabview, address, port, server, manual)
 	retval.data.address = address
 	retval.data.port = port
 	retval.data.server = server
+	retval.data.vault_address = vault_address
 	retval.data.name = default_username()
 	retval.data.selected = 1
 	retval.data.loading = true

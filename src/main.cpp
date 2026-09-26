@@ -18,6 +18,7 @@
 #include "util/serialize.h"
 #include "util/quicktune.h"
 #include "httpfetch.h"
+#include "cloud/cloud_service.h"
 #include "gameparams.h"
 #include "database/database.h"
 #include "config.h"
@@ -794,6 +795,9 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 
 	httpfetch_init(g_settings->getS32("curl_parallel_limit"));
 
+	// Cloud service (friends/DM/room tunnels); stopped in uninit_common
+	cloud::CloudService::get().init();
+
 	init_gettext(porting::path_locale.c_str(),
 		g_settings->get("language"), argc, argv);
 
@@ -802,6 +806,11 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 
 static void uninit_common()
 {
+	// NOTE: cloud::CloudService is a function-local static; its destructor
+	// (registered when it was first constructed, after atexit() here) already
+	// stops all cloud threads and frees its httpfetch caller *before* this
+	// runs. Calling shutdown() again here would operate on an already
+	// destructed object (double-destroy crash at exit).
 	httpfetch_cleanup();
 
 	sockets_cleanup();

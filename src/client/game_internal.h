@@ -144,6 +144,8 @@ protected:
 	void updateInteractTimers(f32 dtime);
 	bool checkConnection();
 	void processQueues();
+	void pollCloudEvents();
+	std::string m_announced_room_code;
 	void updateProfilers(const RunStats &stats, const FpsControl &draw_times, f32 dtime);
 	void updateDebugState();
 	void updateStats(RunStats *stats, const FpsControl &draw_times, f32 dtime);

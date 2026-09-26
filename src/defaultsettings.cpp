@@ -422,6 +422,9 @@ void set_default_settings()
 	// Cloud sync
 	settings->setDefault("cloud_sync_url", "https://api.luanti.cn");
 	settings->setDefault("cloud_site_url", "https://luanti.cn");
+	settings->setDefault("cloud_host_game", "false");
+	settings->setDefault("cloud_stun_servers",
+			"stun.cloudflare.com:3478,stun.l.google.com:19302");
 
 #ifdef __ANDROID__
 	settings->setDefault("contentdb_flag_blacklist", "nonfree, android_default");

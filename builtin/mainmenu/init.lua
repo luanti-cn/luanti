@@ -41,15 +41,21 @@ dofile(menupath .. DIR_DELIM .. "dlg_clients_list.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_server_list_mods.lua")
 dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "store.lua")
 dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "api.lua")
+dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "social.lua")
 dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "dlg_pair.lua")
 dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "dlg_join.lua")
+dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "dlg_join_friend.lua")
+dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "dlg_dm.lua")
 
 local tabs = {
 	content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua"),
 	about = dofile(menupath .. DIR_DELIM .. "tab_about.lua"),
 	local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua"),
 	play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua"),
-	cloud = dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "tab_cloud.lua")
+	cloud = dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "tab_cloud.lua"),
+	friends = dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "tab_friends.lua"),
+	dm = dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "tab_dm.lua"),
+	party = dofile(menupath .. DIR_DELIM .. "cloud" .. DIR_DELIM .. "tab_party.lua")
 }
 
 local function main_event_handler(tabview, event)
@@ -118,6 +124,9 @@ local function init_globals()
 	tv_main:add(tabs.local_game)
 	tv_main:add(tabs.play_online)
 	tv_main:add(tabs.cloud)
+	tv_main:add(tabs.friends)
+	tv_main:add(tabs.dm)
+	tv_main:add(tabs.party)
 	tv_main:add(tabs.content)
 	tv_main:add(tabs.about)
 

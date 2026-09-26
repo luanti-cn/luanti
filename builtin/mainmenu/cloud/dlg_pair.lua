@@ -90,6 +90,7 @@ local function pair_buttonhandler(this, fields)
 				siteUsername = result.data.siteUsername,
 				defaultServerUsername = result.data.defaultServerUsername,
 			})
+			core.cloud_reload_auth() -- notify the C++ cloud service
 			this:delete()
 			ui.update()
 		end)

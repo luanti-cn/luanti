@@ -425,6 +425,7 @@ add_custom_target(GenerateBuiltinFilesCpp
 
 
 add_subdirectory(threading)
+add_subdirectory(cloud)
 add_subdirectory(content)
 add_subdirectory(database)
 add_subdirectory(mapgen)
@@ -478,6 +479,7 @@ set(independent_SRCS
 	tileanimation.cpp
 	tool.cpp
 	${PROJECT_BINARY_DIR}/builtin_files.cpp
+	${cloud_SRCS}
 	${common_network_SRCS}
 	${content_SRCS}
 	${database_SRCS}
