@@ -379,7 +379,7 @@ void CloudService::sendDM(const std::string &username, const std::string &body,
 			pushEvent("dm.ack", ack);
 		} else {
 			Json::Value err(Json::objectValue);
-			err["code"] = result.code;
+			err["code"] = static_cast<Json::Int64>(result.code);
 			err["message"] = result.error;
 			err["refClientId"] = cid;
 			pushEvent("error", err);
