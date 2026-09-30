@@ -1790,13 +1790,14 @@ void Client::typeChatMessage(const std::wstring &message)
 			std::string body = trim(rest.substr(sp + 1));
 			if (!to.empty() && !body.empty()) {
 				cloud::CloudService::get().sendDM(to, body);
-				pushToChatQueue(new ChatMessage(utf8_to_wide(
-						"\x1b(c@#FD0)[私聊 -> " + to + "] " + body)));
+				pushToChatQueue(new ChatMessage(utf8_to_wide(fmtgettext(
+						"\x1b(c@#FD0)[DM -> %s] %s",
+						to.c_str(), body.c_str()))));
 				return;
 			}
 		}
-		pushToChatQueue(new ChatMessage(utf8_to_wide(
-				"\x1b(c@#888)用法: /dm <好友名> <消息>")));
+		pushToChatQueue(new ChatMessage(wstrgettext(
+				"\x1b(c@#888)Usage: /dm <friend> <message>")));
 		return;
 	}
 

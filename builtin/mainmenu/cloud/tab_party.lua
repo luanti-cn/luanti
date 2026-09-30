@@ -6,10 +6,10 @@
 local function member_line(m)
 	local marks = {}
 	if m.isLeader then
-		marks[#marks + 1] = core.colorize("#FFD700", fgettext("[队长]"))
+		marks[#marks + 1] = core.colorize("#FFD700", fgettext("[Leader]"))
 	end
 	if m.online then
-		marks[#marks + 1] = core.colorize("#7bd07b", fgettext("在线"))
+		marks[#marks + 1] = core.colorize("#7bd07b", fgettext("Online"))
 	end
 	return (m.displayName or m.username or "?") ..
 			(#marks > 0 and (" " .. table.concat(marks, " ")) or "")
@@ -18,22 +18,22 @@ end
 local function make_formspec(tabdata)
 	if not cloud_store.info then
 		return table.concat({
-			"label[0.5,1;", fgettext("组队"), "]",
-			"label[0.5,1.7;", fgettext("请先在「云同步」页签配对账号。"), "]",
+			"label[0.5,1;", fgettext("Party"), "]",
+			"label[0.5,1.7;", fgettext("Pair your account on the \"Cloud Sync\" tab first."), "]",
 		})
 	end
 
 	local party = core.cloud_get_party()
 	tabdata.party = party
 
-	local fs = {"label[0.5,0.55;", fgettext("组队"), "]"}
+	local fs = {"label[0.5,0.55;", fgettext("Party"), "]"}
 
 	if type(party) ~= "table" or not party.code then
 		table.insert_all(fs, {
-			"label[0.5,1.4;", fgettext("和好友组成队伍,由队长选择服务器,一键共同进服。"), "]",
-			"button[0.5,2.6;2.6,0.8;cloudparty_create;", fgettext("创建队伍"), "]",
+			"label[0.5,1.4;", fgettext("Form a party with friends; the leader picks the server and everyone joins in one click."), "]",
+			"button[0.5,2.6;2.6,0.8;cloudparty_create;", fgettext("Create Party"), "]",
 			"field[3.5,2.7;3,0.8;cloudparty_code;;]",
-			"button[6.7,2.6;2.6,0.8;cloudparty_join;", fgettext("输入队伍码加入"), "]",
+			"button[6.7,2.6;2.6,0.8;cloudparty_join;", fgettext("Join by Party Code"), "]",
 			"field_close_on_enter[cloudparty_code;false]",
 		})
 	else
@@ -42,16 +42,16 @@ local function make_formspec(tabdata)
 		tabdata.i_am_leader = i_am_leader
 
 		table.insert_all(fs, {
-			"label[0.5,1.4;", fgettext_ne("队伍码:$1", party.code), "]",
-			"label[0.5,2.0;", fgettext_ne("队长:$1", party.leader or "?"), "]",
+			"label[0.5,1.4;", fgettext_ne("Party code: $1", party.code), "]",
+			"label[0.5,2.0;", fgettext_ne("Leader: $1", party.leader or "?"), "]",
 		})
 		if party.serverAddress and party.serverAddress ~= "" then
 			table.insert_all(fs, {
-				"label[0.5,2.6;", fgettext_ne("目标服务器:$1", party.serverAddress), "]",
+				"label[0.5,2.6;", fgettext_ne("Target server: $1", party.serverAddress), "]",
 			})
 		else
 			table.insert_all(fs, {
-				"label[0.5,2.6;", fgettext("目标服务器:未设定"), "]",
+				"label[0.5,2.6;", fgettext("Target server: not set"), "]",
 			})
 		end
 
@@ -69,25 +69,25 @@ local function make_formspec(tabdata)
 		if party.serverAddress and party.serverAddress ~= "" then
 			table.insert_all(fs, {
 				"button[9.3,3.3;4.4,0.8;cloudparty_play;",
-				fgettext("加入队伍服务器"), "]",
+				fgettext("Join Party Server"), "]",
 			})
 		end
 		if i_am_leader then
 			table.insert_all(fs, {
 				"field[0.5,6.3;4,0.8;cloudparty_server;",
-				fgettext("服务器地址(host:port)"), ";]",
+				fgettext("Server address (host:port)"), ";]",
 				"field_close_on_enter[cloudparty_server;false]",
 				"button[4.7,6.3;2.4,0.8;cloudparty_setserver;",
-				fgettext("设定服务器"), "]",
+				fgettext("Set Server"), "]",
 				"button[9.3,6.3;2.2,0.8;cloudparty_kick;",
-				fgettext("踢出成员"), "]",
+				fgettext("Kick Member"), "]",
 				"button[11.7,6.3;2,0.8;cloudparty_end;",
-				fgettext("解散队伍"), "]",
+				fgettext("Disband Party"), "]",
 			})
 		end
 		table.insert_all(fs, {
-			"button[0.5,7.3;2.4,0.8;cloudparty_leave;", fgettext("退出队伍"), "]",
-			"button[3.1,7.3;2.4,0.8;cloudparty_refresh;", fgettext("刷新"), "]",
+			"button[0.5,7.3;2.4,0.8;cloudparty_leave;", fgettext("Leave Party"), "]",
+			"button[3.1,7.3;2.4,0.8;cloudparty_refresh;", fgettext("Refresh"), "]",
 		})
 	end
 
@@ -104,7 +104,7 @@ end
 
 return {
 	name = "cloud_party",
-	caption = fgettext("组队"),
+	caption = fgettext("Party"),
 
 	cbf_formspec = function(tabview, name, tabdata)
 		return make_formspec(tabdata)

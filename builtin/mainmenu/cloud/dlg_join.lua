@@ -8,10 +8,10 @@ local function char_label(char)
 		return char.name
 	end
 	if char.passwordType == "FIXED" then
-		return char.name .. "(" .. fgettext("固定密码") .. ")"
+		return char.name .. "(" .. fgettext("fixed password") .. ")"
 	end
 	if char.passwordType == "LIST_ROTATE" then
-		return char.name .. "(" .. fgettext("密码轮换") .. ")"
+		return char.name .. "(" .. fgettext("rotating password") .. ")"
 	end
 	return char.name
 end
@@ -29,37 +29,37 @@ local function join_formspec(dialogdata)
 		"formspec_version[4]",
 		"size[10,7.4]",
 		"label[0.375,0.8;",
-		fgettext("加入 $1", dialogdata.server and dialogdata.server.name
+		fgettext("Join $1", dialogdata.server and dialogdata.server.name
 				or dialogdata.address), "]",
 	}
 
 	if dialogdata.busy then
 		table.insert_all(retval, {
-			"label[7.4,0.8;", fgettext("请稍候……"), "]",
+			"label[7.4,0.8;", fgettext("Please wait..."), "]",
 		})
 	end
 
 	if dialogdata.loading then
 		table.insert_all(retval, {
-			"label[0.375,1.5;", fgettext("正在加载云端角色……"), "]",
-			"button[6.85,6.2;2.775,0.8;dlg_join_cancel;", fgettext("取消"), "]",
+			"label[0.375,1.5;", fgettext("Loading cloud characters..."), "]",
+			"button[6.85,6.2;2.775,0.8;dlg_join_cancel;", fgettext("Cancel"), "]",
 		})
 		return table.concat(retval)
 	end
 
-	local items = {fgettext("默认(站点用户名 + 随机密码)")}
+	local items = {fgettext("Default (site username + random password)")}
 	for _, char in ipairs(dialogdata.characters or {}) do
 		items[#items + 1] = char_label(char)
 	end
 	local selected = dialogdata.selected or 1
 
 	table.insert_all(retval, {
-		"label[0.375,1.5;", fgettext("云端角色"), "]",
+		"label[0.375,1.5;", fgettext("Cloud characters"), "]",
 		"dropdown[0.375,1.8;9.25,0.8;dd_char;",
 		core.formspec_escape(table.concat(items, ",")), ";",
 		tostring(selected), "]",
 		"field[0.375,3.05;9.25,0.8;te_username;",
-		fgettext("玩家名(仅限字母、数字、- 和 _)"), ";",
+		fgettext("Player name (letters, digits, - and _ only)"), ";",
 		core.formspec_escape(dialogdata.name or ""), "]",
 	})
 
@@ -67,7 +67,7 @@ local function join_formspec(dialogdata)
 		table.insert_all(retval, {
 			"label[0.375,4.1;", core.formspec_escape(dialogdata.char_error), "]",
 			"button[7.75,4.2;1.875,0.6;dlg_join_reload;",
-			fgettext("重试"), "]",
+			fgettext("Retry"), "]",
 		})
 	end
 
@@ -84,9 +84,9 @@ local function join_formspec(dialogdata)
 
 	table.insert_all(retval, {
 		"container[0.375,", tostring(buttons_y), "]",
-		"button[0,0;2.775,0.8;dlg_join_manual;", fgettext("手动登录"), "]",
-		"button[3.6125,0;2.775,0.8;dlg_join_cancel;", fgettext("取消"), "]",
-		"button[7.225,0;2.025,0.8;dlg_join_confirm;", fgettext("加入"), "]",
+		"button[0,0;2.775,0.8;dlg_join_manual;", fgettext("Log In Manually"), "]",
+		"button[3.6125,0;2.775,0.8;dlg_join_cancel;", fgettext("Cancel"), "]",
+		"button[7.225,0;2.025,0.8;dlg_join_confirm;", fgettext("Join"), "]",
 		"container_end[]",
 	})
 
@@ -150,7 +150,7 @@ local function on_join_clicked(this, fields)
 		end
 		if not core.is_valid_player_name(username) then
 			this.data.busy = false
-			this.data.error = fgettext("玩家名不合法:仅限字母、数字、- 和 _,最长 20 个字符")
+			this.data.error = fgettext("Invalid player name: only letters, digits, - and _, max 20 characters")
 			ui.update()
 			return
 		end

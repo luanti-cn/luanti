@@ -17,19 +17,19 @@ local function pair_formspec(dialogdata)
 	local retval = {
 		"formspec_version[4]",
 		"size[8,", tostring(buttons_y + 1.175), "]",
-		"label[0.375,0.8;", fgettext("配对设备"), "]",
+		"label[0.375,0.8;", fgettext("Pair Device"), "]",
 	}
 	if dialogdata.pending then
 		table.insert_all(retval, {
-			"label[6.4,0.8;", fgettext("正在配对……"), "]",
+			"label[6.4,0.8;", fgettext("Pairing..."), "]",
 		})
 	end
 	table.insert_all(retval, {
 		"label[0.375,1.4;",
-		fgettext("1. 在浏览器打开 $1 并登录\\n2. 进入「云同步 → 设备」页面生成配对码(10 分钟内有效)\\n3. 在下方输入 8 位配对码",
+		fgettext("1. Open $1 in your browser and log in\\n2. Go to the \"Cloud Sync -> Devices\" page to generate a pairing code (valid for 10 minutes)\\n3. Enter the 8-character pairing code below",
 				cloud_api.site_url()), "]",
 		"field[0.375,3.1;7.25,0.8;code;",
-		fgettext("配对码(如 ABCD-EF23)"), ";",
+		fgettext("Pairing code (e.g. ABCD-EF23)"), ";",
 		core.formspec_escape(dialogdata.code or ""), "]",
 	})
 
@@ -43,9 +43,9 @@ local function pair_formspec(dialogdata)
 
 	table.insert_all(retval, {
 		"container[0.375,", tostring(buttons_y), "]",
-		"button[0,0;2.3,0.8;dlg_pair_browser;", fgettext("打开网站"), "]",
-		"button[2.475,0;2.3,0.8;dlg_pair_cancel;", fgettext("取消"), "]",
-		"button[4.95,0;2.3,0.8;dlg_pair_confirm;", fgettext("配对"), "]",
+		"button[0,0;2.3,0.8;dlg_pair_browser;", fgettext("Open Website"), "]",
+		"button[2.475,0;2.3,0.8;dlg_pair_cancel;", fgettext("Cancel"), "]",
+		"button[4.95,0;2.3,0.8;dlg_pair_confirm;", fgettext("Pair"), "]",
 		"container_end[]",
 	})
 
@@ -69,7 +69,7 @@ local function pair_buttonhandler(this, fields)
 		this.data.code = fields.code or ""
 		local code = normalize_code(fields.code)
 		if not code then
-			this.data.error = fgettext("配对码格式不正确:应为 8 位字母数字,可带连字符(如 ABCD-EF23)")
+			this.data.error = fgettext("Invalid pairing code: expected 8 alphanumeric characters, optionally hyphenated (e.g. ABCD-EF23)")
 			return true
 		end
 

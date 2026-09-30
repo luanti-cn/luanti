@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "cloud_http_client.h"
+#include "gettext.h"
 #include "log.h"
 #include "porting.h"
 #include "realtime_client.h"
@@ -69,7 +70,7 @@ bool JoinController::prepareJoin(const std::string &username,
 		if (m_stage != JOINING)
 			return;
 		if (!result.success || !result.data.isObject()) {
-			m_error = result.error.empty() ? "加入房间失败" : result.error;
+			m_error = result.error.empty() ? strgettext("Failed to join room") : result.error;
 			m_stage = FAILED;
 			return;
 		}
@@ -166,7 +167,7 @@ void JoinController::onRoomGone()
 {
 	// host closed the room while we were joining/tunneling
 	if (m_stage == JOINING || m_stage == TUNNELING) {
-		m_error = "房主已关闭房间";
+		m_error = strgettext("The host has closed the room");
 		m_tunnel.shutdown();
 		m_stage = FAILED;
 	}

@@ -7,14 +7,14 @@ local DEFAULT_BASE_URL = "https://api.luanti.cn"
 local REQUEST_TIMEOUT = 15
 
 local status_messages = {
-	[400] = "请求参数不合法",
-	[401] = "登录状态已失效,请重新配对设备",
-	[403] = "账号被封禁或已被拉黑",
-	[404] = "资源不存在",
-	[409] = "操作冲突:可能已达数量上限,或名字已被占用",
-	[410] = "配对码已使用或已过期",
-	[413] = "文件过大",
-	[500] = "服务器内部错误,请稍后再试",
+	[400] = "Invalid request parameters",
+	[401] = "Session expired, please pair your device again",
+	[403] = "Account banned or blocked",
+	[404] = "Resource not found",
+	[409] = "Conflict: limit reached or name already taken",
+	[410] = "Pairing code already used or expired",
+	[413] = "File too large",
+	[500] = "Internal server error, please try again later",
 }
 
 function cloud_api.base_url()
@@ -77,9 +77,9 @@ local function do_request(method, path, body, authenticated, callback)
 
 		if not response.succeeded then
 			if response.timeout then
-				result.error = fgettext_ne("请求超时,请检查网络连接")
+				result.error = fgettext_ne("Request timed out, please check your network connection")
 			else
-				result.error = fgettext_ne("网络错误,无法连接到 $1", cloud_api.base_url())
+				result.error = fgettext_ne("Network error, could not connect to $1", cloud_api.base_url())
 			end
 			callback(result)
 			return
@@ -102,7 +102,7 @@ local function do_request(method, path, body, authenticated, callback)
 			if not result.error then
 				local fallback = status_messages[response.code]
 				result.error = fallback and fgettext_ne(fallback)
-						or fgettext_ne("未知错误(HTTP $1)", tostring(response.code))
+						or fgettext_ne("Unknown error (HTTP $1)", tostring(response.code))
 			end
 		end
 

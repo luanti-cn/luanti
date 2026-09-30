@@ -8,18 +8,18 @@
 local function status_text(data)
 	local st = data.status or {}
 	if st.stage == "joining" then
-		return fgettext("正在联系云端……")
+		return fgettext("Contacting cloud...")
 	elseif st.stage == "tunneling" then
 		if st.tunnel and st.tunnel.viaRelay then
-			return fgettext("正在通过中继连接到 $1 ……", st.hostUsername or "?")
+			return fgettext("Connecting to $1 via relay...", st.hostUsername or "?")
 		end
-		return fgettext("正在与 $1 建立直连(打洞)……", st.hostUsername or "?")
+		return fgettext("Establishing direct connection to $1 (hole punching)...", st.hostUsername or "?")
 	elseif st.stage == "connected" then
-		return fgettext("已连接!正在准备进入游戏……")
+		return fgettext("Connected! Preparing to enter the game...")
 	elseif st.stage == "failed" then
-		return fgettext_ne("连接失败:$1", st.error or "")
+		return fgettext_ne("Connection failed: $1", st.error or "")
 	end
-	return fgettext("正在准备……")
+	return fgettext("Preparing...")
 end
 
 local function join_progress_formspec(dialogdata)
@@ -27,7 +27,7 @@ local function join_progress_formspec(dialogdata)
 		"formspec_version[4]",
 		"size[10,4.6]",
 		"label[0.375,0.8;",
-		core.formspec_escape(fgettext("加入好友房间")),"]",
+		core.formspec_escape(fgettext("Join Friend's Room")),"]",
 		"label[0.375,1.7;",
 		core.formspec_escape(status_text(dialogdata)), "]",
 	}
@@ -35,13 +35,13 @@ local function join_progress_formspec(dialogdata)
 	if dialogdata.status and dialogdata.status.stage == "failed" then
 		table.insert_all(fs, {
 			"container[0.375,3.4]",
-			"button[0,0;2.775,0.8;dlg_joinfriend_close;", fgettext("返回"), "]",
+			"button[0,0;2.775,0.8;dlg_joinfriend_close;", fgettext("Back"), "]",
 			"container_end[]",
 		})
 	else
 		table.insert_all(fs, {
 			"container[0.375,3.4]",
-			"button[7.225,0;2.025,0.8;dlg_joinfriend_cancel;", fgettext("取消"), "]",
+			"button[7.225,0;2.025,0.8;dlg_joinfriend_cancel;", fgettext("Cancel"), "]",
 			"container_end[]",
 		})
 	end
@@ -73,7 +73,7 @@ function cloud_social.join_friend(tabview, username, room_code)
 		ok = core.cloud_join_friend(username or "")
 	end
 	if not ok then
-		cloud_social.notify(fgettext("已在加入流程中,请先取消当前操作"), true)
+		cloud_social.notify(fgettext("Already joining, please cancel the current operation first"), true)
 		return
 	end
 

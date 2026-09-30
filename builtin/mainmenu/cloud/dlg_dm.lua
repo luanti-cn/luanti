@@ -59,7 +59,7 @@ function cloud_dm.formspec(dialogdata)
 	for _, m in ipairs(dialogdata.session) do
 		if m.mine then
 			lines[#lines + 1] = core.formspec_escape(
-					core.colorize("#7bd07b", "我") .. ": " .. m.body)
+					core.colorize("#7bd07b", fgettext("Me")) .. ": " .. m.body)
 		else
 			lines[#lines + 1] = core.formspec_escape(
 					core.colorize("#BFBFBF", display) .. ": " .. m.body)
@@ -71,18 +71,18 @@ function cloud_dm.formspec(dialogdata)
 		"formspec_version[4]",
 		"size[12,8]",
 		"label[0.375,0.8;", core.formspec_escape(
-				fgettext("私聊 - $1", display)), "]",
+				fgettext("Direct Messages - $1", display)), "]",
 		"textlist[0.375,1.3;11.25,4.9;;",
 		table.concat(lines, ","), ";0]",
 		"field[0.375,6.5;9.2,0.8;te_msg;;]",
 		"field_close_on_enter[te_msg;false]",
-		"button[9.8,6.5;1.8,0.8;dlg_dm_send;", fgettext("发送"), "]",
-		"button[0.375,7.35;2.5,0.6;dlg_dm_close;", fgettext("关闭"), "]",
+		"button[9.8,6.5;1.8,0.8;dlg_dm_send;", fgettext("Send"), "]",
+		"button[0.375,7.35;2.5,0.6;dlg_dm_close;", fgettext("Close"), "]",
 	}
 
 	if not dialogdata.loaded then
 		table.insert_all(fs, {
-			"label[3.5,7.5;", fgettext("正在加载聊天记录……"), "]",
+			"label[3.5,7.5;", fgettext("Loading chat history..."), "]",
 		})
 	end
 

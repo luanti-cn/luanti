@@ -11,6 +11,7 @@
 
 #include "cloud_config.h"
 #include "convert_json.h"
+#include "gettext.h"
 #include "log.h"
 #include "porting.h"
 
@@ -208,9 +209,9 @@ void CloudService::refreshFriendsFromRest()
 			if (result.code == 401) {
 				// token revoked/expired: force re-pairing
 				CloudConfig::get().clearAuth();
-				pushEvent("notify", "登录状态已失效,请重新配对设备");
+				pushEvent("notify", strgettext("Session expired, please pair your device again"));
 			} else if (!result.error.empty()) {
-				pushEvent("notify", "好友列表获取失败: " + result.error);
+				pushEvent("notify", strgettext("Failed to fetch friends list: ") + result.error);
 			}
 			return;
 		}

@@ -9,6 +9,7 @@
 
 #include "cloud_config.h"
 #include "convert_json.h"
+#include "gettext.h"
 #include "log.h"
 
 namespace cloud
@@ -98,7 +99,8 @@ void CloudHttpClient::step()
 
 		if (!fetch_result.succeeded) {
 			result.error = fetch_result.timeout ?
-					"请求超时,请检查网络连接" : "网络错误,无法连接云端";
+					strgettext("Request timed out, please check your network connection") :
+					strgettext("Network error, could not connect to the cloud");
 		} else if (!fetch_result.data.empty()) {
 			Json::Reader reader;
 			Json::Value body;

@@ -7,8 +7,8 @@ local function make_formspec(tabdata)
 	local info = cloud_store.info
 	if not info then
 		return table.concat({
-			"label[0.5,1;", fgettext("私聊"), "]",
-			"label[0.5,1.7;", fgettext("请先在「云同步」页签配对账号。"), "]",
+			"label[0.5,1;", fgettext("Direct Messages"), "]",
+			"label[0.5,1.7;", fgettext("Pair your account on the \"Cloud Sync\" tab first."), "]",
 		})
 	end
 
@@ -33,21 +33,21 @@ local function make_formspec(tabdata)
 		end
 		local count = tonumber(unread_users[f.username] or 0) or 0
 		local badge = count > 0 and
-				core.colorize("#FFD700", " [" .. count .. " 条未读]") or ""
+				core.colorize("#FFD700", fgettext(" [$1 unread]", count)) or ""
 		local line = core.colorize(f.online and "#7bd07b" or "#999999",
 				display) .. badge
 		lines[#lines + 1] = core.formspec_escape(line)
 		tabdata.dm_names[i] = f.username
 	end
 	if #lines == 0 then
-		lines[1] = fgettext("(暂无好友)")
+		lines[1] = fgettext("(No friends yet)")
 	end
 
 	local fs = {
-		"label[0.5,0.55;", fgettext("私聊"), "]",
+		"label[0.5,0.55;", fgettext("Direct Messages"), "]",
 		"textlist[0.5,1;14.5,4.4;clouddm_list;",
 		table.concat(lines, ","), ";0]",
-		"button[0.5,5.8;2.6,0.8;clouddm_open;", fgettext("打开会话"), "]",
+		"button[0.5,5.8;2.6,0.8;clouddm_open;", fgettext("Open Conversation"), "]",
 	}
 
 	if cloud_social.notice then
@@ -63,7 +63,7 @@ end
 
 return {
 	name = "cloud_dm",
-	caption = fgettext("私聊"),
+	caption = fgettext("DMs"),
 
 	cbf_formspec = function(tabview, name, tabdata)
 		return make_formspec(tabdata)

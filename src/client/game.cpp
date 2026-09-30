@@ -2554,28 +2554,29 @@ void Game::pollCloudEvents()
 	while (cloud::CloudService::get().popEvent(ev)) {
 		std::wstring line;
 		if (ev.type == "dm.new") {
-			line = L"\x1b(c@#FD0)[私聊] " + utf8_to_wide(
-					ev.data["fromDisplay"].asString()) + L": " +
-					utf8_to_wide(ev.data["body"].asString()) +
-					L" \x1b(c@#888)(回复: /dm " +
-					utf8_to_wide(ev.data["from"].asString()) + L" 消息)";
+			line = utf8_to_wide(fmtgettext(
+					"\x1b(c@#FD0)[DM] %s: %s \x1b(c@#888)(reply: /dm %s <message>)",
+					ev.data["fromDisplay"].asString().c_str(),
+					ev.data["body"].asString().c_str(),
+					ev.data["from"].asString().c_str()));
 		} else if (ev.type == "friend.request") {
-			line = L"\x1b(c@#FD0)[好友] " + utf8_to_wide(
-					ev.data["fromDisplay"].asString()) +
-					L" 请求加你为好友,请到网站处理";
+			line = utf8_to_wide(fmtgettext(
+					"\x1b(c@#FD0)[Friends] %s sent you a friend request, please handle it on the website",
+					ev.data["fromDisplay"].asString().c_str()));
 		} else if (ev.type == "friend.accepted") {
-			line = L"\x1b(c@#FD0)[好友] 已与 " + utf8_to_wide(
-					ev.data["displayName"].asString()) + L" 成为好友";
+			line = utf8_to_wide(fmtgettext(
+					"\x1b(c@#FD0)[Friends] You are now friends with %s",
+					ev.data["displayName"].asString().c_str()));
 		} else if (ev.type == "host.ready") {
-			line = L"\x1b(c@#FD0)[联机] 好友可通过房间码 " +
-					utf8_to_wide(ev.data["roomCode"].asString()) +
-					L" 加入你的房间";
+			line = utf8_to_wide(fmtgettext(
+					"\x1b(c@#FD0)[Multiplayer] Friends can join your room with the room code %s",
+					ev.data["roomCode"].asString().c_str()));
 		} else if (ev.type == "party.error") {
-			line = L"\x1b(c@#F00)[组队] " + (ev.data.isString() ?
+			line = wstrgettext("\x1b(c@#F00)[Party] ") + (ev.data.isString() ?
 					utf8_to_wide(ev.data.asString()) :
 					utf8_to_wide(ev.data["message"].asString()));
 		} else if (ev.type == "error") {
-			line = L"\x1b(c@#F00)[云端] " + utf8_to_wide(
+			line = wstrgettext("\x1b(c@#F00)[Cloud] ") + utf8_to_wide(
 					ev.data["message"].asString());
 		}
 		if (!line.empty())
@@ -2588,8 +2589,9 @@ void Game::pollCloudEvents()
 		std::string code = hs["roomCode"].asString();
 		if (!code.empty() && code != m_announced_room_code) {
 			m_announced_room_code = code;
-			chat_backend->addMessage(L"", L"\x1b(c@#FD0)[联机] 好友可通过房间码 " +
-					utf8_to_wide(code) + L" 加入你的房间");
+			chat_backend->addMessage(L"", utf8_to_wide(fmtgettext(
+					"\x1b(c@#FD0)[Multiplayer] Friends can join your room with the room code %s",
+					code.c_str())));
 		}
 	}
 }

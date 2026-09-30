@@ -8062,6 +8062,337 @@ msgstr ""
 msgid "Failed to save screenshot to \"%s\""
 msgstr "无法将屏幕截图保存到“%s”"
 
+#: builtin/mainmenu/cloud/api.lua
+msgid "Invalid request parameters"
+msgstr "请求参数不合法"
+
+msgid "Session expired, please pair your device again"
+msgstr "登录状态已失效，请重新配对设备"
+
+msgid "Account banned or blocked"
+msgstr "账号被封禁或已被拉黑"
+
+msgid "Resource not found"
+msgstr "资源不存在"
+
+msgid "Conflict: limit reached or name already taken"
+msgstr "操作冲突：可能已达数量上限，或名字已被占用"
+
+msgid "Pairing code already used or expired"
+msgstr "配对码已使用或已过期"
+
+msgid "File too large"
+msgstr "文件过大"
+
+msgid "Internal server error, please try again later"
+msgstr "服务器内部错误，请稍后再试"
+
+msgid "Request timed out, please check your network connection"
+msgstr "请求超时，请检查网络连接"
+
+msgid "Network error, could not connect to $1"
+msgstr "网络错误，无法连接到 $1"
+
+msgid "Unknown error (HTTP $1)"
+msgstr "未知错误（HTTP $1）"
+
+#: src/cloud/cloud_http_client.cpp
+msgid "Network error, could not connect to the cloud"
+msgstr "网络错误，无法连接云端"
+
+#: src/cloud/cloud_service.cpp
+msgid "Failed to fetch friends list: "
+msgstr "好友列表获取失败："
+
+#: src/cloud/join_controller.cpp
+msgid "Failed to join room"
+msgstr "加入房间失败"
+
+msgid "The host has closed the room"
+msgstr "房主已关闭房间"
+
+#: builtin/mainmenu/cloud/tab_cloud.lua
+msgid "Connecting to cloud sync service..."
+msgstr "正在连接云同步服务……"
+
+msgid "Log out? Click \"Log Out\" again to confirm"
+msgstr "确认退出登录？再次点击「退出登录」以确认"
+
+msgid "Cloud Sync"
+msgstr "云同步"
+
+msgid "After pairing with a luanti.cn account:\\n· Server credentials are fetched/created automatically, no manual registration\\n· Characters are managed in the cloud and survive device changes\\n· See friends' online status and join their server in one click"
+msgstr "与 luanti.cn 账号配对后：\\n· 进服务器时自动取回/生成该服务器的账号密码，无需手动注册\\n· 云端管理角色（人物卡），换设备不丢失\\n· 查看好友在线状态，一键加入好友所在服务器"
+
+msgid "Open Website"
+msgstr "打开网站"
+
+msgid "Enter Pairing Code"
+msgstr "输入配对码"
+
+msgid "Site account: $1"
+msgstr "站点账号：$1"
+
+msgid "Nickname: $1"
+msgstr "昵称：$1"
+
+msgid "This device: $1"
+msgstr "本机设备：$1"
+
+msgid "Default in-game name: $1"
+msgstr "默认进服名：$1"
+
+msgid "Refresh Identity"
+msgstr "刷新身份"
+
+msgid "Log Out"
+msgstr "退出登录"
+
+#: builtin/mainmenu/cloud/tab_friends.lua
+msgid "(Malformed data: empty friend)"
+msgstr "（异常数据：空好友）"
+
+msgid "Online - $1"
+msgstr "在线 - $1"
+
+msgid "Online"
+msgstr "在线"
+
+msgid "Offline"
+msgstr "离线"
+
+msgid "Friends / DMs / Party"
+msgstr "好友 / 私聊 / 组队"
+
+msgid "After pairing with a luanti.cn account, you can see friends, exchange DMs,\\njoin friends' local games in one click, and use party follow."
+msgstr "与 luanti.cn 账号配对后，即可查看好友、互发私聊、\\n一键加入好友开的本地游戏，并使用组队跟随。"
+
+msgid "Friends ($1)"
+msgstr "好友（$1）"
+
+msgid "(No friends yet, add some on the website)"
+msgstr "（暂无好友，可在网站添加）"
+
+msgid "Send DM"
+msgstr "发私聊"
+
+msgid "Join by Room Code"
+msgstr "房间码加入"
+
+msgid "Friend requests: $1 (handle on the website)"
+msgstr "收到好友申请：$1（请在网站处理）"
+
+msgid "Friends"
+msgstr "好友"
+
+#: builtin/mainmenu/cloud/tab_dm.lua
+msgid " [$1 unread]"
+msgstr " [$1 条未读]"
+
+msgid "(No friends yet)"
+msgstr "（暂无好友）"
+
+msgid "Direct Messages"
+msgstr "私聊"
+
+msgid "Open Conversation"
+msgstr "打开会话"
+
+msgid "DMs"
+msgstr "私聊"
+
+msgid "Pair your account on the \"Cloud Sync\" tab first."
+msgstr "请先在「云同步」页签配对账号。"
+
+#: builtin/mainmenu/cloud/tab_party.lua
+msgid "[Leader]"
+msgstr "[队长]"
+
+msgid "Party"
+msgstr "组队"
+
+msgid "Form a party with friends; the leader picks the server and everyone joins in one click."
+msgstr "和好友组成队伍，由队长选择服务器，一键共同进服。"
+
+msgid "Create Party"
+msgstr "创建队伍"
+
+msgid "Join by Party Code"
+msgstr "输入队伍码加入"
+
+msgid "Party code: $1"
+msgstr "队伍码：$1"
+
+msgid "Leader: $1"
+msgstr "队长：$1"
+
+msgid "Target server: $1"
+msgstr "目标服务器：$1"
+
+msgid "Target server: not set"
+msgstr "目标服务器：未设定"
+
+msgid "Join Party Server"
+msgstr "加入队伍服务器"
+
+msgid "Server address (host:port)"
+msgstr "服务器地址（host:port）"
+
+msgid "Set Server"
+msgstr "设定服务器"
+
+msgid "Kick Member"
+msgstr "踢出成员"
+
+msgid "Disband Party"
+msgstr "解散队伍"
+
+msgid "Leave Party"
+msgstr "退出队伍"
+
+#: builtin/mainmenu/cloud/dlg_dm.lua
+msgid "Me"
+msgstr "我"
+
+msgid "Direct Messages - $1"
+msgstr "私聊 - $1"
+
+msgid "Send"
+msgstr "发送"
+
+msgid "Loading chat history..."
+msgstr "正在加载聊天记录……"
+
+#: builtin/mainmenu/cloud/dlg_join.lua
+msgid "fixed password"
+msgstr "固定密码"
+
+msgid "rotating password"
+msgstr "密码轮换"
+
+msgid "Join $1"
+msgstr "加入 $1"
+
+msgid "Please wait..."
+msgstr "请稍候……"
+
+msgid "Loading cloud characters..."
+msgstr "正在加载云端角色……"
+
+msgid "Default (site username + random password)"
+msgstr "默认（站点用户名 + 随机密码）"
+
+msgid "Cloud characters"
+msgstr "云端角色"
+
+msgid "Player name (letters, digits, - and _ only)"
+msgstr "玩家名（仅限字母、数字、- 和 _）"
+
+msgid "Retry"
+msgstr "重试"
+
+msgid "Log In Manually"
+msgstr "手动登录"
+
+msgid "Join"
+msgstr "加入"
+
+msgid "Invalid player name: only letters, digits, - and _, max 20 characters"
+msgstr "玩家名不合法：仅限字母、数字、- 和 _，最长 20 个字符"
+
+#: builtin/mainmenu/cloud/dlg_join_friend.lua
+msgid "Contacting cloud..."
+msgstr "正在联系云端……"
+
+msgid "Connecting to $1 via relay..."
+msgstr "正在通过中继连接到 $1 ……"
+
+msgid "Establishing direct connection to $1 (hole punching)..."
+msgstr "正在与 $1 建立直连（打洞）……"
+
+msgid "Connected! Preparing to enter the game..."
+msgstr "已连接！正在准备进入游戏……"
+
+msgid "Connection failed: $1"
+msgstr "连接失败：$1"
+
+msgid "Preparing..."
+msgstr "正在准备……"
+
+msgid "Join Friend's Room"
+msgstr "加入好友房间"
+
+msgid "Already joining, please cancel the current operation first"
+msgstr "已在加入流程中，请先取消当前操作"
+
+#: builtin/mainmenu/cloud/dlg_pair.lua
+msgid "Pair Device"
+msgstr "配对设备"
+
+msgid "Pairing..."
+msgstr "正在配对……"
+
+msgid "1. Open $1 in your browser and log in\\n2. Go to the \"Cloud Sync -> Devices\" page to generate a pairing code (valid for 10 minutes)\\n3. Enter the 8-character pairing code below"
+msgstr "1. 在浏览器打开 $1 并登录\\n2. 进入「云同步 → 设备」页面生成配对码（10 分钟内有效）\\n3. 在下方输入 8 位配对码"
+
+msgid "Pairing code (e.g. ABCD-EF23)"
+msgstr "配对码（如 ABCD-EF23）"
+
+msgid "Pair"
+msgstr "配对"
+
+msgid "Invalid pairing code: expected 8 alphanumeric characters, optionally hyphenated (e.g. ABCD-EF23)"
+msgstr "配对码格式不正确：应为 8 位字母数字，可带连字符（如 ABCD-EF23）"
+
+#: builtin/mainmenu/cloud/social.lua
+msgid "DM from $1: $2"
+msgstr "私聊 $1：$2"
+
+msgid "$1 sent you a friend request, please handle it on the website"
+msgstr "$1 请求加你为好友，请到网站处理"
+
+msgid "You are now friends with $1"
+msgstr "已与 $1 成为好友"
+
+msgid "Party info updated"
+msgstr "队伍信息已更新"
+
+msgid "Party failed: $1"
+msgstr "组队失败：$1"
+
+msgid "Cloud error: $1"
+msgstr "云端错误：$1"
+
+#: builtin/mainmenu/tab_local.lua
+msgid "Allow friends to join (cloud)"
+msgstr "允许好友加入（云端）"
+
+#: src/client/client.cpp, src/client/game.cpp
+msgid "(c@#FD0)[DM] %s: %s (c@#888)(reply: /dm %s <message>)"
+msgstr "(c@#FD0)[私聊] %s：%s (c@#888)（回复：/dm %s 消息）"
+
+msgid "(c@#FD0)[Friends] %s sent you a friend request, please handle it on the website"
+msgstr "(c@#FD0)[好友] %s 请求加你为好友，请到网站处理"
+
+msgid "(c@#FD0)[Friends] You are now friends with %s"
+msgstr "(c@#FD0)[好友] 已与 %s 成为好友"
+
+msgid "(c@#FD0)[Multiplayer] Friends can join your room with the room code %s"
+msgstr "(c@#FD0)[联机] 好友可通过房间码 %s 加入你的房间"
+
+msgid "(c@#F00)[Party] "
+msgstr "(c@#F00)[组队] "
+
+msgid "(c@#F00)[Cloud] "
+msgstr "(c@#F00)[云端] "
+
+msgid "(c@#FD0)[DM -> %s] %s"
+msgstr "(c@#FD0)[私聊 -> %s] %s"
+
+msgid "(c@#888)Usage: /dm <friend> <message>"
+msgstr "(c@#888)用法：/dm <好友名> <消息>"
+
+
 #~ msgid "Enable joysticks"
 #~ msgstr "启用摇杆"
 

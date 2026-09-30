@@ -8,17 +8,17 @@ local function friend_line(f)
 		display = name
 	end
 	if name == "" and display == "" then
-		return fgettext("(异常数据:空好友)")
+		return fgettext("(Malformed data: empty friend)")
 	end
 	local status
 	if f.online then
 		if f.currentServerAddress and f.currentServerAddress ~= "" then
-			status = fgettext("在线 - $1", f.currentServerAddress)
+			status = fgettext("Online - $1", f.currentServerAddress)
 		else
-			status = fgettext("在线")
+			status = fgettext("Online")
 		end
 	else
-		status = fgettext("离线")
+		status = fgettext("Offline")
 	end
 	return core.colorize(f.online and "#7bd07b" or "#999999",
 			display) .. " - " .. status
@@ -30,11 +30,11 @@ local function make_formspec(tabdata)
 
 	if not info then
 		table.insert_all(fs, {
-			"label[0.5,1;", fgettext("好友 / 私聊 / 组队"), "]",
+			"label[0.5,1;", fgettext("Friends / DMs / Party"), "]",
 			"label[0.5,1.7;",
-			fgettext("与 luanti.cn 账号配对后,即可查看好友、互发私聊、\\n一键加入好友开的本地游戏,并使用组队跟随。"), "]",
-			"button[0.5,3.6;3,0.8;cloudfr_pair;", fgettext("输入配对码"), "]",
-			"button[4,3.6;3,0.8;cloudfr_browser;", fgettext("打开网站"), "]",
+			fgettext("After pairing with a luanti.cn account, you can see friends, exchange DMs,\\njoin friends' local games in one click, and use party follow."), "]",
+			"button[0.5,3.6;3,0.8;cloudfr_pair;", fgettext("Enter Pairing Code"), "]",
+			"button[4,3.6;3,0.8;cloudfr_browser;", fgettext("Open Website"), "]",
 		})
 		if cloud_social.notice then
 			table.insert_all(fs, {
@@ -45,7 +45,7 @@ local function make_formspec(tabdata)
 	end
 
 	table.insert_all(fs, {
-		"label[0.5,0.55;", fgettext("好友($1)", #tabdata.friends or 0), "]",
+		"label[0.5,0.55;", fgettext("Friends ($1)", #tabdata.friends or 0), "]",
 	})
 
 	-- friend list
@@ -56,7 +56,7 @@ local function make_formspec(tabdata)
 		tabdata.friend_names[i] = f.username
 	end
 	if #lines == 0 then
-		lines[1] = fgettext("(暂无好友,可在网站添加)")
+		lines[1] = fgettext("(No friends yet, add some on the website)")
 	end
 	table.insert_all(fs, {
 		"textlist[0.5,1;14.5,3.2;cloudfr_list;",
@@ -65,15 +65,15 @@ local function make_formspec(tabdata)
 
 	-- actions
 	table.insert_all(fs, {
-		"button[0.5,4.4;2.2,0.8;cloudfr_join;", fgettext("加入游戏"), "]",
-		"button[2.9,4.4;2.2,0.8;cloudfr_dm;", fgettext("发私聊"), "]",
-		"button[5.3,4.4;2.2,0.8;cloudfr_refresh;", fgettext("刷新"), "]",
+		"button[0.5,4.4;2.2,0.8;cloudfr_join;", fgettext("Join Game"), "]",
+		"button[2.9,4.4;2.2,0.8;cloudfr_dm;", fgettext("Send DM"), "]",
+		"button[5.3,4.4;2.2,0.8;cloudfr_refresh;", fgettext("Refresh"), "]",
 	})
 
 	-- room code entry
 	table.insert_all(fs, {
 		"field[7.8,4.5;3.2,0.8;cloudfr_code;;]",
-		"button[11.2,4.4;2.2,0.8;cloudfr_code_join;", fgettext("房间码加入"), "]",
+		"button[11.2,4.4;2.2,0.8;cloudfr_code_join;", fgettext("Join by Room Code"), "]",
 		"field_close_on_enter[cloudfr_code;false]",
 	})
 
@@ -85,7 +85,7 @@ local function make_formspec(tabdata)
 	if #reqs > 0 then
 		table.insert_all(fs, {
 			"label[0.5,5.6;", core.formspec_escape(
-					fgettext("收到好友申请:$1(请在网站处理)",
+					fgettext("Friend requests: $1 (handle on the website)",
 					table.concat(reqs, ", "))), "]",
 		})
 	end
@@ -111,7 +111,7 @@ end
 
 return {
 	name = "cloud_friends",
-	caption = fgettext("好友"),
+	caption = fgettext("Friends"),
 
 	cbf_formspec = function(tabview, name, tabdata)
 		tabdata.friends = {}
