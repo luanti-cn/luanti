@@ -2486,7 +2486,7 @@ void GUIFormSpecMenu::parseBackgroundColor(parserData* data, const std::string &
 
 	// bgcolor
 	if (parameter_count >= 1 && !parts[0].empty())
-		parseColorString(parts[0], m_bgcolor, false);
+		m_explicit_bgcolor = parseColorString(parts[0], m_bgcolor, false) || m_explicit_bgcolor;
 
 	// fullscreen
 	if (parameter_count >= 2) {
@@ -3265,6 +3265,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 	m_formspec_version = 1;
 	m_bgcolor = video::SColor(140, 0, 0, 0);
+	m_explicit_bgcolor = false;
 	m_tabheader_upper_edge = 0;
 
 	{
@@ -3277,7 +3278,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		);
 	}
 
-	m_default_tooltip_bgcolor = video::SColor(255,110,130,60);
+	m_default_tooltip_bgcolor = video::SColor(240,16,0,16);
 	m_default_tooltip_color = video::SColor(255,255,255,255);
 
 	// Add tooltip
@@ -3738,8 +3739,27 @@ void GUIFormSpecMenu::drawMenu()
 
 	if (m_bgfullscreen)
 		driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
-	if (m_bgnonfullscreen)
-		driver->draw2DRectangle(m_bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+	if (m_bgnonfullscreen) {
+		if (!m_explicit_bgcolor && !m_inventorylists.empty()) {
+			// The default inventory is a solid, beveled gray panel. An explicit
+			// bgcolor, background image or "neither" remains under mod control.
+			const s32 px = std::max(1, (s32)std::round(Environment->getSkin()->getScale()));
+			auto r = AbsoluteRect;
+			auto fill = [&](video::SColor color, const core::rect<s32> &rect) {
+				driver->draw2DRectangle(color, rect, &AbsoluteClippingRect);
+			};
+			fill(video::SColor(255, 0, 0, 0), r);
+			r.UpperLeftCorner += v2s32(px, px);
+			r.LowerRightCorner -= v2s32(px, px);
+			fill(video::SColor(255, 198, 198, 198), r);
+			fill(video::SColor(255, 255, 255, 255), {r.UpperLeftCorner.X, r.UpperLeftCorner.Y,
+				r.LowerRightCorner.X, r.UpperLeftCorner.Y + px});
+			fill(video::SColor(255, 85, 85, 85), {r.UpperLeftCorner.X, r.LowerRightCorner.Y - px,
+				r.LowerRightCorner.X, r.LowerRightCorner.Y});
+		} else {
+			driver->draw2DRectangle(m_bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+		}
+	}
 
 	/*
 		Draw rect_mode tooltip

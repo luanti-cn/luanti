@@ -22,6 +22,10 @@ end
 function mm_game_theme.set_engine(hide_decorations)
 	mm_game_theme.gameid = nil
 	mm_game_theme.stop_music()
+	if classic_ui then
+		classic_ui.background(false)
+		return
+	end
 
 	core.set_topleft_text("")
 
@@ -63,6 +67,10 @@ function mm_game_theme.set_game(gamedetails)
 	end
 	mm_game_theme.gameid = gamedetails.id
 	mm_game_theme.set_music(gamedetails)
+	if classic_ui then
+		classic_ui.background(false)
+		return
+	end
 
 	core.set_topleft_text(gamedetails.name)
 

@@ -1,0 +1,9 @@
+Original classic UI artwork
+SPDX-License-Identifier: CC0-1.0
+
+Applies to classic_*.png, crosshair.png and object_crosshair.png in this directory.
+These images are generated from original patterns and procedural geometry in
+util/generate_classic_ui.py. No Minecraft textures, logo or font files are used.
+
+CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/

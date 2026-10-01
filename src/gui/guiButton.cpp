@@ -258,21 +258,32 @@ void GUIButton::draw()
 	IGUISkin *skin = Environment->getSkin();
 	// END PATCH
 
-	if (DrawBorder)
-	{
-		if (!Pressed)
-		{
-			// PATCH
-			skin->drawColored3DButtonPaneStandard(this, AbsoluteRect,
-					&AbsoluteClippingRect, Colors);
-			// END PATCH
-		}
-		else
-		{
-			// PATCH
-			skin->drawColored3DButtonPanePressed(this, AbsoluteRect,
-					&AbsoluteClippingRect, Colors);
-			// END PATCH
+	if (DrawBorder) {
+		// Hard, integer-aligned bevels rather than a desktop-widget gradient.
+		// Explicit formspec colors and image backgrounds still take precedence.
+		const s32 px = std::max(1, (s32)std::round(skin->getScale()));
+		auto r = AbsoluteRect;
+		auto fill = [&](video::SColor color, const core::rect<s32> &rect) {
+			driver->draw2DRectangle(color, rect, &AbsoluteClippingRect);
+		};
+		fill(video::SColor(255, 0, 0, 0), r);
+		r.UpperLeftCorner += core::position2di(px, px);
+		r.LowerRightCorner -= core::position2di(px, px);
+		if (r.isValid()) {
+			video::SColor face = Colors[EGDC_3D_FACE];
+			if (!isEnabled())
+				face = multiplyColorValue(face, 0.5f);
+			fill(face, r);
+			const auto light = face.getInterpolated(video::SColor(255, 255, 255, 255), 0.6f);
+			const auto dark = multiplyColorValue(face, 0.45f);
+			fill(Pressed ? dark : light, {r.UpperLeftCorner.X, r.UpperLeftCorner.Y,
+				r.LowerRightCorner.X, r.UpperLeftCorner.Y + px});
+			fill(Pressed ? dark : light, {r.UpperLeftCorner.X, r.UpperLeftCorner.Y,
+				r.UpperLeftCorner.X + px, r.LowerRightCorner.Y});
+			fill(Pressed ? light : dark, {r.UpperLeftCorner.X, r.LowerRightCorner.Y - px,
+				r.LowerRightCorner.X, r.LowerRightCorner.Y});
+			fill(Pressed ? light : dark, {r.LowerRightCorner.X - px, r.UpperLeftCorner.Y,
+				r.LowerRightCorner.X, r.LowerRightCorner.Y});
 		}
 	}
 
@@ -711,7 +722,8 @@ void GUIButton::setFromStyle(const StyleSpec& style)
 	if (style.isNotDefault(StyleSpec::TEXTCOLOR)) {
 		setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR));
 	} else {
-		setOverrideColor(video::SColor(255,255,255,255));
+		setOverrideColor(hovered ? video::SColor(255, 255, 255, 160) :
+				video::SColor(255, 255, 255, 255));
 		OverrideColorEnabled = false;
 	}
 	setNotClipped(style.getBool(StyleSpec::NOCLIP, false));

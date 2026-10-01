@@ -166,6 +166,8 @@ void GUITable::setTable(const TableOptions &options,
 	}
 
 	// Handle table options
+	m_rowheight = m_font ? m_font->getDimension(L"Ay").Height + 4 : 1;
+	const s32 base_rowheight = std::max(1, m_rowheight);
 	s32 opendepth = 0;
 	for (const Option &option : options) {
 		const std::string &name = option.name;
@@ -182,6 +184,13 @@ void GUITable::setTable(const TableOptions &options,
 			parseColorString(value, m_highlight_text, false);
 		else if (name == "opendepth")
 			opendepth = stoi(value);
+		else if (name == "rowheight") {
+			const float factor = stof(value);
+			if (std::isfinite(factor)) {
+				m_rowheight_factor = rangelim(factor, 1.0f, 8.0f);
+				m_rowheight = base_rowheight * m_rowheight_factor;
+			}
+		}
 		else
 			errorstream<<"Invalid table option: \""<<name<<"\""
 				<<" (value=\""<<value<<"\")"<<std::endl;
@@ -489,6 +498,8 @@ void GUITable::clear()
 	m_highlight_text = skin->getColor(gui::EGDC_HIGH_LIGHT_TEXT);
 
 	// Reset members
+	m_rowheight_factor = 1.0f;
+	m_rowheight = m_font ? std::max(1U, m_font->getDimension(L"Ay").Height + 4) : 1;
 	m_is_textlist = false;
 	m_has_tree_column = false;
 	m_selected = -1;
@@ -595,7 +606,7 @@ void GUITable::setOverrideFont(IGUIFont *font)
 	m_font->grab();
 
 	m_rowheight = m_font->getDimension(L"Ay").Height + 4;
-	m_rowheight = MYMAX(m_rowheight, 1);
+	m_rowheight = MYMAX(m_rowheight, 1) * m_rowheight_factor;
 
 	updateScrollBar();
 }

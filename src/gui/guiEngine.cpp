@@ -34,6 +34,7 @@
 #endif
 
 #include <algorithm>
+#include <cmath>
 #include <csignal>
 
 
@@ -499,6 +500,15 @@ void GUIEngine::drawBackground(video::IVideoDriver *driver)
 		(s32) screensize.X - (s32) bg_size.X,
 		(s32) screensize.Y - (s32) bg_size.Y
 	) / 2;
+	if (m_textures[TEX_LAYER_BACKGROUND].panorama) {
+		// Slow drift within the image's overscan; never expose an empty edge.
+		bg_size.X *= 1.04f;
+		bg_size.Y *= 1.04f;
+		const float phase = porting::getTimeMs() * 0.00008f;
+		offset.X = ((s32)screensize.X - (s32)bg_size.X) / 2;
+		offset.Y = ((s32)screensize.Y - (s32)bg_size.Y) / 2;
+		offset.X += std::sin(phase) * ((s32)bg_size.X - (s32)screensize.X) / 2;
+	}
 	/* Draw background texture */
 	draw2DImageFilterScaled(driver, texture,
 		core::rect<s32>(offset.X, offset.Y, bg_size.X + offset.X, bg_size.Y + offset.Y),
@@ -628,6 +638,8 @@ bool GUIEngine::setTexture(texture_layer layer, const std::string &texturepath,
 	m_textures[layer].texture = m_texture_source->getTexture(texturepath);
 	m_textures[layer].tile    = tile_image;
 	m_textures[layer].minsize = minsize;
+	m_textures[layer].panorama = texturepath == porting::getDataPath(
+			"textures" DIR_DELIM "base" DIR_DELIM "pack" DIR_DELIM "classic_panorama.png");
 
 	return m_textures[layer].texture != nullptr;
 }

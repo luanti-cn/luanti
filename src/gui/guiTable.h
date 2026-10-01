@@ -195,6 +195,7 @@ protected:
 	video::SColor m_highlight = video::SColor(255, 70, 100, 50);
 	video::SColor m_highlight_text = video::SColor(255, 255, 255, 255);
 	s32 m_rowheight = 1;
+	float m_rowheight_factor = 1.0f;
 	gui::IGUIFont *m_font = nullptr;
 	GUIScrollBar *m_scrollbar = nullptr;
 

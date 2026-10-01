@@ -410,6 +410,7 @@ protected:
 	bool m_bgnonfullscreen;
 	bool m_bgfullscreen;
 	video::SColor m_bgcolor;
+	bool m_explicit_bgcolor = false;
 	video::SColor m_fullscreen_bgcolor;
 	video::SColor m_default_tooltip_bgcolor;
 	video::SColor m_default_tooltip_color;
