@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rebuild original classic UI art and the BlockPixel font (Pillow, fontTools).
+"""Rebuild original classic UI art and BlockPixel (Pillow, fontTools, NumPy).
 
 No Minecraft assets or fonts are used. All bitmap patterns are authored here.
 SPDX-License-Identifier: CC0-1.0
@@ -10,6 +10,7 @@ import math
 import random
 
 from PIL import Image, ImageDraw, ImageFilter
+import numpy as np
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
@@ -160,62 +161,111 @@ def build_dirt():
 
 
 def build_panorama():
-    # Original voxel river valley. Perspective faces are depth-sorted, then
-    # lightly blurred just like a distant title-screen panorama.
-    w, h = 1280, 640
-    image = Image.new("RGB", (w, h))
-    draw = ImageDraw.Draw(image)
-    for y in range(h):
-        t = y / h
-        draw.line((0, y, w, y), fill=(int(112 + 44*t), int(164 + 35*t), int(216 + 10*t)))
+    # Cast perspective rays through a complete voxel volume. The old polygon
+    # painter omitted side faces and stopped before the foreground, leaving
+    # blue holes and incorrect occlusion. Camera roll is always zero.
+    w, h = 640, 360
+    nx, ny, nz = 160, 48, 192
+    xs, zs = np.meshgrid(np.arange(nx), np.arange(nz), indexing="ij")
+    river = 80 + 7 * np.sin(zs / 25)
+    bank = np.maximum(0, np.abs(xs - river) - 5)
+    heights = np.clip(np.rint(4 + bank * .24 +
+        2 * np.sin(xs / 11) * np.cos(zs / 17) +
+        2 * np.sin(zs / 29)), 2, 23).astype(np.int32)
+    levels = np.arange(ny)[None, :, None]
+    world = np.where(levels <= heights[:, None, :], 2, 0).astype(np.uint8)
+    world[xs, heights, zs] = np.where(heights <= 7, 6, 1)
+    world[(world == 0) & (levels <= 6)] = 3
+
+    # Materials: grass, soil, water, wood, foliage, sand, cloud.
     rng = random.Random(991)
-    for _ in range(20):
-        x, y = rng.randrange(w), rng.randrange(30, 150)
-        draw.rectangle((x, y, x + rng.randrange(45, 190), y + 12), fill=(219, 232, 245))
+    for _ in range(300):
+        x, z = rng.randrange(5, nx - 5), rng.randrange(24, nz - 5)
+        ground = int(heights[x, z])
+        if ground <= 8 or abs(x - river[x, z]) < 10:
+            continue
+        top = ground + rng.randrange(5, 8)
+        world[x, ground + 1:top + 1, z] = 4
+        for y in range(top - 2, top + 3):
+            radius = 1 if y == top + 2 else 2
+            crown = world[x-radius:x+radius+1, y, z-radius:z+radius+1]
+            crown[crown == 0] = 5
+    for _ in range(18):
+        x, z = rng.randrange(4, nx - 20), rng.randrange(50, nz - 20)
+        world[x:x+rng.randrange(8, 19), 35:37, z:z+rng.randrange(5, 12)] = 7
 
-    def height(x, z):
-        river = 5 * math.sin(z / 15)
-        return max(0, round(2 + 4 * math.sin(x / 8) * math.cos(z / 11) +
-                            abs(x - river) / 7 - 4 * math.exp(-((x-river)/5)**2)))
+    u, v = np.meshgrid((np.arange(w) + .5) / w * 2 - 1,
+                       1 - (np.arange(h) + .5) / h * 2)
+    fov = math.tan(math.radians(72) / 2)
+    pitch = math.radians(8)
+    screen_y = v * fov * h / w
+    directions = np.stack((u * fov,
+        screen_y * math.cos(pitch) - math.sin(pitch),
+        math.cos(pitch) + screen_y * math.sin(pitch)), axis=-1).reshape(-1, 3)
+    directions /= np.linalg.norm(directions, axis=1)[:, None]
+    origin = np.array([82.5, 16.5, 12.5])
+    count = w * h
+    cells = np.broadcast_to(np.floor(origin).astype(np.int32), (count, 3)).copy()
+    steps = np.sign(directions).astype(np.int32)
+    deltas = np.full_like(directions, np.inf)
+    np.divide(1, np.abs(directions), out=deltas, where=directions != 0)
+    crossing = (np.where(steps > 0, cells + 1 - origin, origin - cells)) * deltas
+    crossing[directions == 0] = np.inf
+    material = np.zeros(count, dtype=np.uint8)
+    distance = np.zeros(count)
+    axis_hit = np.ones(count, dtype=np.int32)
+    active = np.arange(count)
+    bounds = np.array([nx, ny, nz])
 
-    def project(x, y, z):
-        depth = z + 28
-        return (w/2 + (x-2) * 620/depth, 235 + (10-y) * 620/depth)
+    # DDA visits each ray's nearest next voxel boundary. First occupied voxel
+    # wins, so every visible face has correct perspective and occlusion.
+    for _ in range(nx + ny + nz):
+        if active.size == 0:
+            break
+        axes = crossing[active].argmin(axis=1)
+        travel = crossing[active, axes].copy()
+        cells[active, axes] += steps[active, axes]
+        crossing[active, axes] += deltas[active, axes]
+        inside = ((cells[active] >= 0) & (cells[active] < bounds)).all(axis=1)
+        active, axes, travel = active[inside], axes[inside], travel[inside]
+        cell = cells[active]
+        types = world[cell[:, 0], cell[:, 1], cell[:, 2]]
+        hit = types != 0
+        pixels = active[hit]
+        material[pixels] = types[hit]
+        distance[pixels] = travel[hit]
+        axis_hit[pixels] = axes[hit]
+        active = active[~hit]
+    assert active.size == 0, "Incomplete voxel traversal"
+    assert np.all(material.reshape(h, w)[3*h//4:] != 0), "Uncovered foreground"
 
-    faces = []
-    for z in range(85, -8, -1):
-        for x in range(-65, 66):
-            y = height(x, z)
-            top_y = max(1, y)
-            n = rng.randrange(-15, 16)
-            top = (57+n, 105+n, 167+n) if y < 1 else (85+n, 130+n, 54+n)
-            top_points = [project(x, top_y, z), project(x+1, top_y, z),
-                          project(x+1, top_y, z+1), project(x, top_y, z+1)]
-            faces.append((z + 0.5, top_points, top))
-            neighbor = max(1, height(x, z-1))
-            if top_y > neighbor:
-                pts = [project(x, top_y, z), project(x+1, top_y, z),
-                       project(x+1, neighbor, z), project(x, neighbor, z)]
-                faces.append((z - 0.05, pts, (92+n, 70+n, 44+n)))
-            if y > 2 and rng.random() < 0.017:
-                tx, tz = project(x+0.5, y, z)
-                s = 620/(z+28)
-                faces.append((z - 0.1, [(tx-s*.18,tz), (tx+s*.18,tz),
-                                      (tx+s*.18,tz-3*s), (tx-s*.18,tz-3*s)], (85, 65, 43)))
-                faces.append((z - 0.2, [(tx-1.2*s,tz-2*s), (tx+1.2*s,tz-2*s),
-                                      (tx+1.2*s,tz-4.2*s), (tx-1.2*s,tz-4.2*s)], (42+n, 85+n, 36+n)))
-    for _, points, color in sorted(faces, key=lambda face: -face[0]):
-        draw.polygon(points, fill=color)
-    image = image.filter(ImageFilter.GaussianBlur(1.6))
-    # Subtle vignette keeps white text readable without hiding the landscape.
-    overlay = Image.new("RGBA", image.size)
-    pixels = overlay.load()
-    for y in range(h):
-        for x in range(w):
-            edge = ((x-w/2)/(w/2))**2 + ((y-h/2)/(h/2))**2
-            pixels[x, y] = (0, 0, 0, int(12 + min(edge, 2) * 26))
-    image = Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
-    image.save(PACK / "classic_panorama.png")
+    sky_t = np.clip(directions[:, 1] * 1.4 + .2, 0, 1)[:, None]
+    horizon = np.array([184, 210, 230])
+    sky = horizon * (1 - sky_t) + np.array([88, 151, 216]) * sky_t
+    palette = np.array([[0, 0, 0], [105, 158, 65], [116, 85, 53],
+        [56, 126, 177], [96, 70, 42], [63, 125, 43], [193, 183, 129], [244, 248, 250]])
+    colors = palette[material].astype(float)
+    point = origin + directions * distance[:, None]
+    # Grass occupies only the upper edge of a vertical soil face.
+    side = (material == 1) & (axis_hit != 1) & (point[:, 1] % 1 < .78)
+    colors[side] = palette[2]
+    normal = np.zeros_like(directions)
+    normal[np.arange(count), axis_hit] = -steps[np.arange(count), axis_hit]
+    sunlight = normal @ np.array([-.45, .8, -.35])
+    colors *= (.56 + .44 * np.maximum(sunlight, 0))[:, None]
+    texture_cell = np.floor(point * 8).astype(np.int32)
+    noise = ((texture_cell[:, 0] * 37 ^ texture_cell[:, 1] * 23 ^
+              texture_cell[:, 2] * 47) % 17 - 8)[:, None]
+    colors += noise
+    water = material == 3
+    colors[water] = palette[3] + noise[water] * .6
+    fog = (np.clip(distance / 150, 0, 1) ** 1.6 * .8)[:, None]
+    colors = colors * (1 - fog) + horizon * fog
+    colors[material == 0] = sky[material == 0]
+    vignette = (1 - .1 * (u * u + v * v)).reshape(-1, 1)
+    pixels = np.clip(colors * vignette * .91, 0, 255).astype(np.uint8).reshape(h, w, 3)
+    image = Image.fromarray(pixels).resize((1280, 720), Image.Resampling.NEAREST)
+    image.filter(ImageFilter.GaussianBlur(1.8)).save(PACK / "classic_panorama.png")
 
 
 def build_hud():
