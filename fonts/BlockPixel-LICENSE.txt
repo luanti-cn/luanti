@@ -1,0 +1,12 @@
+BlockPixel Regular and the generated classic_* UI artwork
+
+SPDX-License-Identifier: CC0-1.0
+
+These original glyphs and UI graphics were created for LuantiCN. No Minecraft
+textures, logos, fonts, screenshots or other proprietary assets are included.
+The reproducible source is util/generate_classic_ui.py.
+
+To the extent possible under law, the authors have waived all copyright and
+related or neighboring rights to these glyphs and generated graphics under
+Creative Commons CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/

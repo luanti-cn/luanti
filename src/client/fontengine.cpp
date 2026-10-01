@@ -10,6 +10,8 @@
 #include "util/numeric.h" // rangelim
 #include "exceptions.h"
 #include "gettext.h"
+#include "porting.h"
+#include "filesys.h"
 #include <IGUIEnvironment.h>
 #include <IGUIFont.h>
 
@@ -273,9 +275,12 @@ gui::IGUIFont *FontEngine::initFont(FontSpec spec)
 	g_settings->getU16NoEx("font_shadow", font_shadow);
 	g_settings->getU16NoEx("font_shadow_alpha", font_shadow_alpha);
 
-	auto createFont = [&](gui::SGUITTFace *face) -> gui::CGUITTFont* {
+	auto createFont = [&](gui::SGUITTFace *face, bool pixel = false) -> gui::CGUITTFont* {
+		const u32 raster_size = pixel ? std::max(8U, (u32)std::round(size / 8.0f) * 8) : size;
+		// Integer-sized pixel outlines stay crisp in the standard 32-bit atlas.
+		// The monochrome 16-bit atlas is unreliable on some OpenGL drivers.
 		auto *font = gui::CGUITTFont::createTTFont(m_env,
-				face, size, true, spec.mode != _FM_Fallback, font_shadow,
+				face, raster_size, true, spec.mode != _FM_Fallback, font_shadow,
 				font_shadow_alpha);
 
 		if (!font)
@@ -324,7 +329,8 @@ gui::IGUIFont *FontEngine::initFont(FontSpec spec)
 				<< " " << size << "pt" << std::endl;
 
 		if (auto *face = getOrLoadFace(font_path)) {
-			return createFont(face);
+			return createFont(face, font_path == porting::getDataPath(
+					"fonts" DIR_DELIM "BlockPixel-Regular.ttf"));
 		}
 
 		errorstream << "FontEngine: Cannot load '" << font_path <<

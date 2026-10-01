@@ -588,7 +588,7 @@ local function get_formspec(dialogdata)
 			y = y + 0.82
 		end
 		fs[#fs + 1] = ("box[0,%f;%f,0.8;%s]"):format(
-			y, left_pane_width-left_pane_padding, other_page.id == page_id and "#467832FF" or "#3339")
+			y, left_pane_width-left_pane_padding, other_page.id == page_id and "#6B6B6BFF" or "#25201DCC")
 		fs[#fs + 1] = ("button[0,%f;%f,0.8;page_%s;%s]")
 			:format(y, left_pane_width-left_pane_padding, other_page.id, fgettext(other_page.title))
 		y = y + 0.82
@@ -842,7 +842,8 @@ if INIT == "mainmenu" then
 		load()
 		local dlg = dialog_create("dlg_settings", get_formspec, buttonhandler, eventhandler)
 
-		dlg.data.page_id = page_id or update_filtered_pages("")
+		local default_page = update_filtered_pages("")
+		dlg.data.page_id = filtered_page_by_id[page_id] and page_id or default_page
 
 		return dlg
 	end

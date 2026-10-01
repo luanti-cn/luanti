@@ -3692,6 +3692,10 @@ Elements
 
 ### `tableoptions[<opt 1>;<opt 2>;...]`
 
+* LuantiCN extension: `rowheight=<factor>` scales the default row height by a
+  factor from 1 to 8 (default: 1). This supports world icons and multiline rows
+  while retaining the table's native scrolling, selection and keyboard handling.
+
 * Sets options for `table[]`
 * `color=#RRGGBB`
     * default text color (`ColorString`), defaults to `#FFFFFF`

@@ -142,7 +142,7 @@ void Hud::readScalingSetting()
 	m_hotbar_imagesize = std::floor(HOTBAR_IMAGE_SIZE *
 		RenderingEngine::getDisplayDensity() + 0.5f);
 	m_hotbar_imagesize *= m_hud_scaling;
-	m_padding = m_hotbar_imagesize / 12;
+	m_padding = m_hotbar_imagesize / 8;
 }
 
 Hud::~Hud()
@@ -156,76 +156,24 @@ Hud::~Hud()
 void Hud::drawItem(const ItemStack &item, const core::rect<s32>& rect,
 		bool selected)
 {
-	if (selected) {
-		/* draw highlighting around selected item */
-		if (use_hotbar_selected_image) {
-			core::rect<s32> imgrect2 = rect;
-			imgrect2.UpperLeftCorner.X  -= (m_padding*2);
-			imgrect2.UpperLeftCorner.Y  -= (m_padding*2);
-			imgrect2.LowerRightCorner.X += (m_padding*2);
-			imgrect2.LowerRightCorner.Y += (m_padding*2);
-				video::ITexture *texture = tsrc->getTexture(hotbar_selected_image);
-				core::dimension2di imgsize(texture->getOriginalSize());
-			draw2DImageFilterScaled(driver, texture, imgrect2,
-					core::rect<s32>(core::position2d<s32>(0,0), imgsize),
-					NULL, hbar_colors, true);
-		} else {
-			video::SColor c_outside(255,255,0,0);
-			//video::SColor c_outside(255,0,0,0);
-			//video::SColor c_inside(255,192,192,192);
-			s32 x1 = rect.UpperLeftCorner.X;
-			s32 y1 = rect.UpperLeftCorner.Y;
-			s32 x2 = rect.LowerRightCorner.X;
-			s32 y2 = rect.LowerRightCorner.Y;
-			// Black base borders
-			driver->draw2DRectangle(c_outside,
-				core::rect<s32>(
-				v2s32(x1 - m_padding, y1 - m_padding),
-				v2s32(x2 + m_padding, y1)
-				), NULL);
-			driver->draw2DRectangle(c_outside,
-				core::rect<s32>(
-				v2s32(x1 - m_padding, y2),
-				v2s32(x2 + m_padding, y2 + m_padding)
-				), NULL);
-			driver->draw2DRectangle(c_outside,
-				core::rect<s32>(
-				v2s32(x1 - m_padding, y1),
-					v2s32(x1, y2)
-				), NULL);
-			driver->draw2DRectangle(c_outside,
-				core::rect<s32>(
-					v2s32(x2, y1),
-				v2s32(x2 + m_padding, y2)
-				), NULL);
-			/*// Light inside borders
-			driver->draw2DRectangle(c_inside,
-				core::rect<s32>(
-					v2s32(x1 - padding/2, y1 - padding/2),
-					v2s32(x2 + padding/2, y1)
-				), NULL);
-			driver->draw2DRectangle(c_inside,
-				core::rect<s32>(
-					v2s32(x1 - padding/2, y2),
-					v2s32(x2 + padding/2, y2 + padding/2)
-				), NULL);
-			driver->draw2DRectangle(c_inside,
-				core::rect<s32>(
-					v2s32(x1 - padding/2, y1),
-					v2s32(x1, y2)
-				), NULL);
-			driver->draw2DRectangle(c_inside,
-				core::rect<s32>(
-					v2s32(x2, y1),
-					v2s32(x2 + padding/2, y2)
-				), NULL);
-			*/
-		}
-	}
+	auto draw_frame = [&](const std::string &name, s32 padding) {
+		video::ITexture *texture = tsrc->getTexture(name);
+		if (!texture)
+			return;
+		auto bounds = rect;
+		bounds.UpperLeftCorner -= v2s32(padding, padding);
+		bounds.LowerRightCorner += v2s32(padding, padding);
+		draw2DImageFilterScaled(driver, texture, bounds,
+				core::rect<s32>(v2s32(), texture->getOriginalSize()),
+				nullptr, hbar_colors, true);
+	};
 
-	video::SColor bgcolor2(128, 0, 0, 0);
 	if (!use_hotbar_image)
-		driver->draw2DRectangle(bgcolor2, rect, NULL);
+		draw_frame("classic_hotbar.png", m_padding);
+	if (selected)
+		draw_frame(use_hotbar_selected_image ? hotbar_selected_image :
+				"classic_hotbar_selected.png", m_padding * 2);
+
 	drawItemStack(driver, g_fontengine->getFont(), item, rect, NULL,
 		client, selected ? IT_ROT_SELECTED : IT_ROT_NONE);
 }
@@ -1045,7 +993,7 @@ void Hud::resizeHotbar() {
 		m_hotbar_imagesize = floor(HOTBAR_IMAGE_SIZE *
 			RenderingEngine::getDisplayDensity() + 0.5);
 		m_hotbar_imagesize *= m_hud_scaling;
-		m_padding = m_hotbar_imagesize / 12;
+		m_padding = m_hotbar_imagesize / 8;
 		m_screensize = window_size;
 		m_displaycenter = v2s32(m_screensize.X/2,m_screensize.Y/2);
 	}

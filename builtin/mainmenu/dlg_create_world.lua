@@ -233,7 +233,7 @@ local function create_world_formspec(dialogdata)
 		form = form .. "label[0,"..(y+0.1)..";" .. fgettext("Biomes") .. "]"
 		y = y + 0.6
 
-		form = form .. "dropdown[0,"..y..";6.3;mgv6_biomes;"
+		form = form .. "dropdown[0,"..y..";6.3,0.6;mgv6_biomes;"
 		for b=1, #mgv6_biomes do
 			form = form .. mgv6_biomes[b][1]
 			if b < #mgv6_biomes then
@@ -272,18 +272,20 @@ local function create_world_formspec(dialogdata)
 	end
 
 	local retval =
-		"size[12.25,7.4,true]" ..
+		"formspec_version[6]size[15.5,9]padding[0.025,0.025]bgcolor[;neither]" ..
+		"style_type[label;halign=center]label[0,0.05;15.5,0.6;" .. fgettext("Create New World") .. "]" ..
+		"style_type[label;halign=left]" ..
 
 		-- Left side
-		"container[0,0]"..
-		"field[0.3,0.6;6,0.5;te_world_name;" ..
+		"container[1.65,1.2]"..
+		"field[0,0.5;6,0.8;te_world_name;" ..
 		fgettext("World name") ..
 		";" .. core.formspec_escape(dialogdata.worldname) .. "]" ..
 		"set_focus[te_world_name;false]"
 
 	if not disallowed_mapgen_settings["seed"] then
 
-		retval = retval .. "field[0.3,1.7;6,0.5;te_seed;" ..
+		retval = retval .. "field[0,2;6,0.8;te_seed;" ..
 				-- TRANSLATORS: Value for randomness
 				fgettext("Seed") ..
 				";".. core.formspec_escape(dialogdata.seed) .. "]"
@@ -291,14 +293,14 @@ local function create_world_formspec(dialogdata)
 	end
 
 	retval = retval ..
-		"label[0,2;" .. fgettext("Mapgen") .. "]"..
-		"dropdown[0,2.5;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]"
+		"label[0,3.15;" .. fgettext("Mapgen") .. "]"..
+		"dropdown[0,3.5;6,0.8;dd_mapgen;" .. mglist .. ";" .. selindex .. "]"
 
 	-- Warning when making a devtest world
 	if game.id == "devtest" then
 		retval = retval ..
-			"container[0,3.5]" ..
-			"box[0,0;5.8,1.7;#ff8800]" ..
+			"container[0,4.7]" ..
+			"box[0,0;5.8,1.7;#473824]" ..
 			"textarea[0.4,0.1;6,1.8;;;"..
 			fgettext("Development Test is meant for developers.") .. "]" ..
 			"button[1,1;4,0.5;world_create_open_cdb;" .. fgettext("Install another game") .. "]" ..
@@ -309,15 +311,15 @@ local function create_world_formspec(dialogdata)
 		"container_end[]" ..
 
 		-- Right side
-		"container[6.2,0]"..
+		"container[8.05,1.35]"..
 		label_flags .. str_flags ..
 		label_spflags .. str_spflags ..
 		"container_end[]"..
 
 		-- Menu buttons
-		"container[0,6.9]"..
-		"button[3.25,0;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]" ..
-		"button[6.25,0;3,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
+		"container[0,8.1]"..
+		"button[1.65,0;6,0.8;world_create_cancel;" .. fgettext("Cancel") .. "]" ..
+		"button[7.85,0;6,0.8;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		"container_end[]"
 
 	return retval

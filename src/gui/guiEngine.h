@@ -34,6 +34,7 @@ struct image_definition {
 	video::ITexture *texture = nullptr;
 	bool             tile;
 	unsigned int     minsize;
+	bool             panorama = false;
 };
 
 /******************************************************************************/
