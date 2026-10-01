@@ -97,7 +97,7 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		-- Search
-		"field[0.25,0.25;7,0.75;te_search;;" .. core.formspec_escape(tabdata.search_for) .. "]" ..
+		"field[1.65,0.15;9.95,0.75;te_search;;" .. core.formspec_escape(tabdata.search_for) .. "]" ..
 		"tooltip[te_search;" .. core.formspec_escape(table.concat({
 				fgettext("Possible filters"),
 				"game:<name>",
@@ -106,7 +106,7 @@ local function get_formspec(tabview, name, tabdata)
 				"sort:[-](name|relevance|players|mods|uptime|ping|lag)",
 		}, "\n")) .. "]" ..
 		"field_enter_after_edit[te_search;true]" ..
-		"container[7.25,0.25]" ..
+		"container[11.6,0.15]" ..
 		"image_button[0,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "search.png") .. ";btn_mp_search;]" ..
 		"image_button[0.75,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "clear.png") .. ";btn_mp_clear;]" ..
 		"image_button[1.5,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "refresh.png") .. ";btn_mp_refresh;]" ..
@@ -117,7 +117,7 @@ local function get_formspec(tabview, name, tabdata)
 		"container_end[]" ..
 
 		"container[9.75,0]" ..
-		"box[0,0;5.75,7.1;#666666]" ..
+		"" ..
 
 		-- TRANSLATORS: Network address
 		"label[0.25,0.35;" .. fgettext("Address") .. "]" ..
@@ -130,7 +130,7 @@ local function get_formspec(tabview, name, tabdata)
 
 		-- Description Background
 		"label[0.25,1.6;" .. fgettext("Server Description") .. "]" ..
-		"box[0.25,1.85;5.25,2.7;#999999]"..
+		"box[0.25,1.85;5.25,2.7;#171310]"..
 
 		-- Name / Password
 		"container[0,4.8]" ..
@@ -226,6 +226,11 @@ local function get_formspec(tabview, name, tabdata)
 
 	retval = retval .. "container_end[]"
 
+	local split = assert(retval:find("container[9.75,0]", 1, true))
+	local search_fs = retval:sub(1, split - 1)
+	local connection_fs = retval:sub(split):gsub("container%[9%.75,0%]", "container[4.875,0]")
+	retval = search_fs .. "tableoptions[rowheight=2.5;background=#171310;border=false;highlight=#444444]"
+
 	-- Table
 	retval = retval .. "tablecolumns[" ..
 		-- TRANSLATORS: Also known as "latency"
@@ -254,7 +259,7 @@ local function get_formspec(tabview, name, tabdata)
 		"align=inline,padding=0.25,width=1.5;" ..
 		"color,align=inline,span=1;" ..
 		"text,align=inline,padding=1]" ..
-		"table[0.25,1;9.25,5.8;servers;"
+		"table[1.65,1.15;12.2,4.4;servers;"
 
 	local servers = get_sorted_servers()
 
@@ -273,7 +278,10 @@ local function get_formspec(tabview, name, tabdata)
 			rows[#rows + 1] = dividers[section]
 			for _, server in ipairs(section_servers) do
 				tabdata.lookup[#rows + 1] = server
-				rows[#rows + 1] = render_serverlist_row(server)
+				local display = table.copy(server)
+				display.name = (server.name or server.address) .. "\n" ..
+					(server.description or server.gameid or server.address):match("^[^\n]*")
+				rows[#rows + 1] = render_serverlist_row(display)
 			end
 		end
 	end
@@ -291,7 +299,11 @@ local function get_formspec(tabview, name, tabdata)
 		end
 	end
 	retval = retval .. ";" .. selected_row_idx .. "]"
-
+	if tabdata.show_connect then
+		return connection_fs
+	end
+	retval = retval .. "button[1.65,5.8;6,0.8;btn_show_connect;" .. fgettext("Join Server") .. "]" ..
+		"button[7.85,5.8;6,0.8;btn_direct_connect;" .. fgettext("Direct Connect") .. "]"
 	return retval
 end
 
@@ -507,7 +519,7 @@ local function join_game(fields, te_port_number, tabdata)
 	gamedata.selected_world = 0
 
 	local idx = core.get_table_index("servers")
-	local server = idx and tabdata.lookup[idx]
+	local server = idx and tabdata.lookup[idx] or find_selected_server()
 
 	if server and server.address == gamedata.address and
 			server.port == gamedata.port then
@@ -532,6 +544,12 @@ local function join_game(fields, te_port_number, tabdata)
 end
 
 local function main_button_handler(tabview, fields, name, tabdata)
+	if fields.btn_show_connect or fields.btn_direct_connect then
+		if fields.btn_direct_connect then set_selected_server(nil) end
+		tabdata.show_connect = true
+		return true
+	end
+
 	if fields.te_name then
 		gamedata.playername = fields.te_name
 		core.settings:set("name", fields.te_name)
@@ -543,45 +561,8 @@ local function main_button_handler(tabview, fields, name, tabdata)
 
 		if server then
 			if event.type == "DCL" then
-				if not is_server_protocol_compat_or_error(
-							server.proto_min, server.proto_max) then
-					return true
-				end
-
-				if cloud_join and cloud_store.info and cloud_join.handle(
-						tabview, server.address, server.port, server, function()
-					gamedata.mode       = "join"
-					gamedata.address    = server.address
-					gamedata.port       = server.port
-					gamedata.playername = fields.te_name
-					gamedata.selected_world = 0
-
-					if fields.te_pwd then
-						gamedata.password = fields.te_pwd
-					end
-
-					if gamedata.address and gamedata.port then
-						set_selected_server(server)
-						core.start()
-					end
-				end) then
-					return true
-				end
-
-				gamedata.mode       = "join"
-				gamedata.address    = server.address
-				gamedata.port       = server.port
-				gamedata.playername = fields.te_name
-				gamedata.selected_world = 0
-
-				if fields.te_pwd then
-					gamedata.password = fields.te_pwd
-				end
-
-				if gamedata.address and gamedata.port then
-					set_selected_server(server)
-					core.start()
-				end
+				set_selected_server(server)
+				tabdata.show_connect = true
 				return true
 			end
 			if event.type == "CHG" then
@@ -599,10 +580,10 @@ local function main_button_handler(tabview, fields, name, tabdata)
 
 	if fields.btn_delete_favorite then
 		local idx = core.get_table_index("servers")
-		if not idx then return end
-
-		serverlistmgr.delete_favorite(tabdata.lookup[idx])
-		set_selected_server(tabdata.lookup[idx+1])
+		local server = idx and tabdata.lookup[idx] or find_selected_server()
+		if not server then return false end
+		serverlistmgr.delete_favorite(server)
+		if idx then set_selected_server(tabdata.lookup[idx+1]) end
 		return true
 	end
 
@@ -648,7 +629,8 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		return true
 	end
 
-	local host_filled = (fields.te_address ~= "") and fields.te_port:match("^%s*[1-9][0-9]*%s*$")
+	local host_filled = fields.te_address and fields.te_address ~= "" and
+		fields.te_port and fields.te_port:match("^%s*[1-9][0-9]*%s*$")
 	local te_port_number = tonumber(fields.te_port)
 
 	if (fields.btn_mp_login or fields.key_enter) and host_filled then
@@ -666,7 +648,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 
 	if fields.btn_mp_register and host_filled then
 		local idx = core.get_table_index("servers")
-		local server = idx and tabdata.lookup[idx]
+		local server = idx and tabdata.lookup[idx] or find_selected_server()
 		if server and (server.address ~= fields.te_address or server.port ~= te_port_number) then
 			server = nil
 		end
@@ -695,7 +677,7 @@ end
 
 return {
 	name = "online",
-	caption = fgettext("Join Game"),
+	caption = fgettext("Multiplayer"),
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change

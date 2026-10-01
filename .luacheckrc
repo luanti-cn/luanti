@@ -109,3 +109,7 @@ files["builtin/common/tests"] = {
 		"assert",
 	},
 }
+
+files["builtin/mainmenu/tests"] = {
+	std = "+busted",
+}

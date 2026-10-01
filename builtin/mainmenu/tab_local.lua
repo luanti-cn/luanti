@@ -3,7 +3,7 @@
 -- SPDX-License-Identifier: LGPL-2.1-or-later
 
 
-local current_game, singleplayer_refresh_gamebar
+local current_game, main_button_handler
 local valid_disabled_settings = {
 	["enable_damage"]=true,
 	["creative_mode"]=true,
@@ -13,6 +13,14 @@ local valid_disabled_settings = {
 -- Name and port stored to persist when updating the formspec
 local current_name = core.settings:get("name")
 local current_port = core.settings:get("port")
+local current_password = ""
+
+local function selected_world_index()
+	local index = core.get_textlist_index("sp_worlds")
+	if index and index > 0 then return index end
+	return filterlist.get_current_index(menudata.worldlist,
+		tonumber(core.settings:get("mainmenu_last_selected_world")))
+end
 
 -- Currently chosen game in gamebar for theming and filtering
 function current_game()
@@ -48,7 +56,7 @@ function apply_game(game)
 	local index = filterlist.get_current_index(menudata.worldlist,
 		tonumber(core.settings:get("mainmenu_last_selected_world")))
 	if not index or index < 1 then
-		local selected = core.get_textlist_index("sp_worlds")
+		local selected = selected_world_index()
 		if selected ~= nil and selected < #menudata.worldlist:get_list() then
 			index = selected
 		else
@@ -56,67 +64,6 @@ function apply_game(game)
 		end
 	end
 	menu_worldmt_legacy(index)
-end
-
-function singleplayer_refresh_gamebar()
-
-	local old_bar = ui.find_by_name("game_button_bar")
-	if old_bar ~= nil then
-		old_bar:delete()
-	end
-
-	-- Hide gamebar if no games are installed
-	if #pkgmgr.games == 0 then
-		return false
-	end
-
-	local function game_buttonbar_button_handler(fields)
-		for _, game in ipairs(pkgmgr.games) do
-			if fields["game_btnbar_" .. game.id] then
-				apply_game(game)
-				return true
-			end
-		end
-	end
-
-	local TOUCH_GUI = core.settings:get_bool("touch_gui")
-
-	local gamebar_pos_y = MAIN_TAB_H
-		+ TABHEADER_H -- tabheader included in formspec size
-		+ (TOUCH_GUI and GAMEBAR_OFFSET_TOUCH or GAMEBAR_OFFSET_DESKTOP)
-
-	local btnbar = buttonbar_create(
-			"game_button_bar",
-			{x = 0, y = gamebar_pos_y},
-			{x = MAIN_TAB_W, y = GAMEBAR_H},
-			"#000000",
-			game_buttonbar_button_handler)
-
-	for _, game in ipairs(pkgmgr.games) do
-		local btn_name = "game_btnbar_" .. game.id
-
-		local image = nil
-		local text = nil
-		local tooltip = core.formspec_escape(game.title)
-
-		if (game.menuicon_path or "") ~= "" then
-			image = core.formspec_escape(game.menuicon_path)
-		else
-			local part1 = game.id:sub(1,5)
-			local part2 = game.id:sub(6,10)
-			local part3 = game.id:sub(11)
-
-			text = part1 .. "\n" .. part2
-			if part3 ~= "" then
-				text = text .. "\n" .. part3
-			end
-		end
-		btnbar:add_button(btn_name, text, image, tooltip)
-	end
-
-	local plus_image = core.formspec_escape(defaulttexturedir .. "plus.png")
-	btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
-	return true
 end
 
 local function get_disabled_settings(game)
@@ -146,139 +93,117 @@ local function get_disabled_settings(game)
 end
 
 local function get_formspec(tabview, name, tabdata)
-
-	-- Point the player to ContentDB when no games are found
 	if #pkgmgr.games == 0 then
-		local W = tabview.width
-		local H = tabview.height
-
-		local hypertext = "<global valign=middle halign=center size=18>" ..
-				fgettext_ne("Luanti is a game-creation platform that allows you to play many different games.") .. "\n" ..
-				fgettext_ne("Luanti doesn't come with a game by default.") .. " " ..
-				fgettext_ne("You need to install a game before you can create a world.")
-
-		local button_y = H * 2/3 - 0.6
-		return table.concat({
-			"hypertext[0.375,0;", W - 2*0.375, ",", button_y, ";ht;", core.formspec_escape(hypertext), "]",
-			"button[5.25,", button_y, ";5,1.2;game_open_cdb;", fgettext("Install a game"), "]"})
+		return "style_type[label;halign=center]" ..
+			"label[0,1.5;15.5,1;" .. fgettext("Install a game to start your adventure") .. "]" ..
+			"button[3.75,3.5;8,0.8;game_open_cdb;" .. fgettext("Install a game") .. "]"
 	end
 
-	local retval = ""
-
-	local index = core.get_textlist_index("sp_worlds") or filterlist.get_current_index(menudata.worldlist,
-				tonumber(core.settings:get("mainmenu_last_selected_world"))) or 0
-
-	local list = menudata.worldlist:get_list()
-	-- When changing tabs to a world list with fewer entries, the last index is selected (visually).
-	-- However, the formspec fields lag behind, thus 'index > #list' can be a valid choice.
-	local world = list and list[math.min(index, #list)]
-	local game
-
-	if world then
-		game = pkgmgr.find_by_gameid(world.gameid)
-	else
-		game = current_game()
+	local games, game_index = {}, 1
+	local chosen = current_game()
+	for i, game in ipairs(pkgmgr.games) do
+		games[i] = core.formspec_escape(game.title)
+		if game.id == chosen.id then game_index = i end
 	end
-	local disabled_settings = get_disabled_settings(game)
-
-	local creative, damage, host = "", "", ""
-
-	-- Y offsets for game settings checkboxes
-	local y = 0.2
-	local yo = 0.5625
-
-	if world then
-		if disabled_settings["creative_mode"] == nil then
-			creative = "checkbox[0,"..y..";cb_creative_mode;".. fgettext("Creative Mode") .. ";" ..
-				dump(core.settings:get_bool("creative_mode")) .. "]"
-			y = y + yo
+	local index = filterlist.get_current_index(menudata.worldlist,
+		tonumber(core.settings:get("mainmenu_last_selected_world"))) or 0
+	local rows, image_options = {}, {}
+	for i, world in ipairs(menudata.worldlist:get_list()) do
+		local game = pkgmgr.find_by_gameid(world.gameid)
+		-- Use a world's optional icon without ever requiring one.
+		local icon = defaulttexturedir .. "no_screenshot.png"
+		for _, filename in ipairs(core.get_dir_list(world.path, false)) do
+			if filename == "icon.png" then icon = world.path .. DIR_DELIM .. filename end
 		end
-		if disabled_settings["enable_damage"] == nil then
-			damage = "checkbox[0,"..y..";cb_enable_damage;".. fgettext("Enable Damage") .. ";" ..
-				dump(core.settings:get_bool("enable_damage")) .. "]"
-			y = y + yo
-		end
-		if disabled_settings["enable_server"] == nil then
-			host = "checkbox[0,"..y..";cb_server;".. fgettext("Host Server") ..";" ..
-				dump(core.settings:get_bool("enable_server")) .. "]"
-			y = y + yo
-		end
+		image_options[#image_options + 1] = i .. "=" .. core.formspec_escape(icon)
+		rows[#rows + 1] = tostring(i)
+		rows[#rows + 1] = core.formspec_escape(world.name .. "\n" ..
+			(game and game.title or world.gameid))
 	end
-
-	retval = retval .. "container[5.25,4.875]"
-	if world then
-		retval = retval ..
-				"button[0,0;3.225,0.8;world_delete;".. fgettext("Delete") .. "]" ..
-				"button[3.325,0;3.225,0.8;world_configure;".. fgettext("Select Mods") .. "]"
+	local fs = {
+		"dropdown[1.65,0.15;12.2,0.7;classic_game;", table.concat(games, ","), ";", game_index, ";true]",
+		"tableoptions[rowheight=3;background=#171310;border=false;highlight=#444444]",
+		"tablecolumns[image,padding=0.7", #image_options > 0 and "," or "",
+			table.concat(image_options, ","), ";text,padding=1]",
+		"table[1.65,1.05;12.2,3.8;sp_worlds;", table.concat(rows, ","), ";", index, "]",
+		"button[1.65,5.05;6,0.8;play;", fgettext("Play Selected World"), "]",
+		"button[7.85,5.05;6,0.8;world_create;", fgettext("Create New World"), "]",
+		"button[1.65,6.05;3.9,0.8;world_configure;", fgettext("Select Mods"), "]",
+		"button[5.8,6.05;3.9,0.8;world_options;", fgettext("World Options..."), "]",
+		"button[9.95,6.05;3.9,0.8;world_delete;", fgettext("Delete"), "]",
+	}
+	if #rows == 0 then
+		fs[#fs + 1] = "style_type[label;halign=center]label[1.65,2;12.2,1;" ..
+			fgettext("No worlds yet. Create your first world!") .. "]"
 	end
-	retval = retval ..
-			"button[6.65,0;3.225,0.8;world_create;".. fgettext("New") .. "]" ..
-			"container_end[]" ..
-			"container[0.375,0.375]" ..
-			creative ..
-			damage ..
-			host ..
-			"container_end[]" ..
-			"container[5.25,0.375]" ..
-			"label[0,0.2;".. fgettext("Select World:") .. "]"..
-			"textlist[0,0.5;9.875,3.9;sp_worlds;" ..
-			menu_render_worldlist() ..
-			";" .. index .. "]" ..
-			"container_end[]"
-
-	if core.settings:get_bool("enable_server") and disabled_settings["enable_server"] == nil then
-		retval = retval ..
-				"button[10.1875,5.925;4.9375,0.8;play;".. fgettext("Host Game") .. "]" ..
-				"container[0.375,0.375]" ..
-				"checkbox[0,"..y..";cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
-				dump(core.settings:get_bool("server_announce")) .. "]"
-		y = y + yo
-		if cloud_store.info then
-			retval = retval ..
-				"checkbox[0,"..y..";cb_cloud_host;" ..
-				fgettext("Allow friends to join (cloud)") .. ";" ..
-				dump(core.settings:get_bool("cloud_host_game")) .. "]"
-		end
-
-		-- Reset y so that the text fields always start at the same position,
-		-- regardless of whether some of the checkboxes are hidden.
-		y = 0.2 + 4 * yo + 0.35
-
-		retval = retval .. "field[0," .. y .. ";4.5,0.75;te_playername;" .. fgettext("Name") .. ";" ..
-				core.formspec_escape(current_name) .. "]"
-
-		y = y + 1.15 + 0.25
-
-		retval = retval .. "pwdfield[0," .. y .. ";4.5,0.75;te_passwd;" .. fgettext("Password") .. "]"
-
-		y = y + 1.15 + 0.25
-
-		local bind_addr = core.settings:get("bind_address")
-		if bind_addr ~= nil and bind_addr ~= "" then
-			retval = retval ..
-				"field[0," .. y .. ";3,0.75;te_serveraddr;" .. fgettext("Bind Address") .. ";" ..
-				core.formspec_escape(core.settings:get("bind_address")) .. "]" ..
-				-- TRANSLATORS: Network port
-				"field[3.25," .. y .. ";1.25,0.75;te_serverport;" .. fgettext("Port") .. ";" ..
-				core.formspec_escape(current_port) .. "]"
-		else
-			retval = retval ..
-				"field[0," .. y .. ";4.5,0.75;te_serverport;" .. fgettext("Server Port") .. ";" ..
-				core.formspec_escape(current_port) .. "]"
-		end
-
-		retval = retval .. "container_end[]"
-	elseif world then
-		retval = retval ..
-				"button[10.1875,5.925;4.9375,0.8;play;" .. fgettext("Play Game") .. "]"
-	end
-
-	return retval
+	return table.concat(fs)
 end
 
-local function main_button_handler(this, fields, name, tabdata)
+local function world_options_formspec()
+	local selected = selected_world_index()
+	local world = selected and menudata.worldlist:get_list()[selected]
+	local disabled = get_disabled_settings(world and pkgmgr.find_by_gameid(world.gameid) or current_game())
+	local fs = {"formspec_version[6]size[10,8]bgcolor[;neither]",
+		"style_type[label;halign=center]label[0,0.2;10,0.8;" .. fgettext("World Options...") .. "]",
+		"style_type[label;halign=left]"}
+	for i, entry in ipairs({{"creative_mode", "cb_creative_mode", "Creative Mode"},
+		{"enable_damage", "cb_enable_damage", "Enable Damage"},
+		{"enable_server", "cb_server", "Host Server"}}) do
+		if disabled[entry[1]] == nil then
+			fs[#fs + 1] = ("checkbox[1,%f;%s;%s;%s]"):format(0.9 + i * 0.6,
+				entry[2], fgettext(entry[3]), dump(core.settings:get_bool(entry[1])))
+		end
+	end
+	if core.settings:get_bool("enable_server") and disabled.enable_server == nil then
+		fs[#fs + 1] = "checkbox[5.1,1.5;cb_server_announce;" .. fgettext("Announce Server") ..
+			";" .. dump(core.settings:get_bool("server_announce")) .. "]"
+		if cloud_store.info then
+			fs[#fs + 1] = "checkbox[5.1,2.1;cb_cloud_host;" .. fgettext("Allow friends to join (cloud)") ..
+				";" .. dump(core.settings:get_bool("cloud_host_game")) .. "]"
+		end
+		fs[#fs + 1] = "field[1,3.3;3.9,0.75;te_playername;" .. fgettext("Name") ..
+			";" .. core.formspec_escape(current_name or "") .. "]field_close_on_enter[te_playername;false]"
+		fs[#fs + 1] = "pwdfield[5.1,3.3;3.9,0.75;te_passwd;" .. fgettext("Password") .. "]"
+		fs[#fs + 1] = "field_close_on_enter[te_passwd;false]"
+		fs[#fs + 1] = "field[1,4.8;3.9,0.75;te_serverport;" .. fgettext("Server Port") ..
+			";" .. core.formspec_escape(current_port or "30000") .. "]field_close_on_enter[te_serverport;false]"
+		fs[#fs + 1] = "field[5.1,4.8;3.9,0.75;te_serveraddr;" .. fgettext("Bind Address") ..
+			";" .. core.formspec_escape(core.settings:get("bind_address") or "") .. "]field_close_on_enter[te_serveraddr;false]"
+	end
+	fs[#fs + 1] = "button[1,6.8;8,0.8;world_options_done;" .. fgettext("Done") .. "]"
+	return table.concat(fs)
+end
+
+main_button_handler = function(this, fields, name, tabdata)
 
 	assert(name == "local")
+
+	if fields.classic_game then
+		local game = pkgmgr.games[tonumber(fields.classic_game)]
+		if game and game.id ~= current_game().id then
+			apply_game(game)
+			core.settings:set("mainmenu_last_selected_world", menudata.worldlist:get_raw_index(1))
+			menu_worldmt_legacy(1)
+			return true
+		end
+	end
+	if fields.te_passwd then current_password = fields.te_passwd end
+	if fields.te_serveraddr then core.settings:set("bind_address", fields.te_serveraddr) end
+	if fields.world_options then
+		local selected = selected_world_index()
+		if not selected or selected < 1 then return true end
+		local dlg = dialog_create("world_options", world_options_formspec, function(dialog, values)
+			values.key_enter = nil
+			main_button_handler(this, values, name, tabdata)
+			if values.world_options_done then dialog:delete() end
+			return true
+		end)
+		dlg:set_parent(this)
+		this:hide()
+		dlg:show()
+		return true
+	end
+
 
 	if fields.game_open_cdb then
 		local maintab = ui.find_by_name("maintab")
@@ -304,8 +229,8 @@ local function main_button_handler(this, fields, name, tabdata)
 	end
 
 	if fields["sp_worlds"] ~= nil then
-		local event = core.explode_textlist_event(fields["sp_worlds"])
-		local selected = core.get_textlist_index("sp_worlds")
+		local event = core.explode_table_event(fields["sp_worlds"])
+		local selected = selected_world_index()
 
 		menu_worldmt_legacy(selected)
 
@@ -326,7 +251,7 @@ local function main_button_handler(this, fields, name, tabdata)
 
 	if fields["cb_creative_mode"] then
 		core.settings:set("creative_mode", fields["cb_creative_mode"])
-		local selected = core.get_textlist_index("sp_worlds")
+		local selected = selected_world_index()
 		menu_worldmt(selected, "creative_mode", fields["cb_creative_mode"])
 
 		return true
@@ -334,7 +259,7 @@ local function main_button_handler(this, fields, name, tabdata)
 
 	if fields["cb_enable_damage"] then
 		core.settings:set("enable_damage", fields["cb_enable_damage"])
-		local selected = core.get_textlist_index("sp_worlds")
+		local selected = selected_world_index()
 		menu_worldmt(selected, "enable_damage", fields["cb_enable_damage"])
 
 		return true
@@ -348,7 +273,7 @@ local function main_button_handler(this, fields, name, tabdata)
 
 	if fields["cb_server_announce"] then
 		core.settings:set("server_announce", fields["cb_server_announce"])
-		local selected = core.get_textlist_index("srv_worlds")
+		local selected = selected_world_index()
 		menu_worldmt(selected, "server_announce", fields["cb_server_announce"])
 
 		return true
@@ -366,7 +291,7 @@ local function main_button_handler(this, fields, name, tabdata)
 			return true
 		end
 
-		local selected = core.get_textlist_index("sp_worlds")
+		local selected = selected_world_index()
 		gamedata.selected_world = menudata.worldlist:get_raw_index(selected)
 
 		if selected == nil or gamedata.selected_world == 0 then
@@ -394,9 +319,9 @@ local function main_button_handler(this, fields, name, tabdata)
 
 		if core.settings:get_bool("enable_server") then
 			gamedata.mode       = "host"
-			gamedata.playername = fields["te_playername"]
-			gamedata.password   = fields["te_passwd"]
-			gamedata.port       = fields["te_serverport"]
+			gamedata.playername = fields["te_playername"] or current_name
+			gamedata.password   = fields["te_passwd"] or current_password
+			gamedata.port       = fields["te_serverport"] or current_port
 			gamedata.address    = ""
 
 			core.settings:set("port",gamedata.port)
@@ -421,7 +346,7 @@ local function main_button_handler(this, fields, name, tabdata)
 	end
 
 	if fields["world_delete"] ~= nil then
-		local selected = core.get_textlist_index("sp_worlds")
+		local selected = selected_world_index()
 		if selected ~= nil and
 			selected <= menudata.worldlist:size() then
 			local world = menudata.worldlist:get_list()[selected]
@@ -440,7 +365,7 @@ local function main_button_handler(this, fields, name, tabdata)
 	end
 
 	if fields["world_configure"] ~= nil then
-		local selected = core.get_textlist_index("sp_worlds")
+		local selected = selected_world_index()
 		if selected ~= nil then
 			local configdialog =
 				create_configure_world_dlg(
@@ -457,7 +382,7 @@ local function main_button_handler(this, fields, name, tabdata)
 	end
 end
 
-local function on_change(type)
+local function on_change(type, old_tab, new_tab)
 	if type == "ENTER" then
 		local game = current_game()
 		if game then
@@ -466,22 +391,15 @@ local function on_change(type)
 			mm_game_theme.set_engine()
 		end
 
-		if singleplayer_refresh_gamebar() then
-			ui.find_by_name("game_button_bar"):show()
-		end
 	elseif type == "LEAVE" then
-		menudata.worldlist:set_filtercriteria(nil)
-		local gamebar = ui.find_by_name("game_button_bar")
-		if gamebar then
-			gamebar:hide()
-		end
+		if new_tab then menudata.worldlist:set_filtercriteria(nil) end
 	end
 end
 
 --------------------------------------------------------------------------------
 return {
 	name = "local",
-	caption = fgettext("Start Game"),
+	caption = fgettext("Select World"),
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change

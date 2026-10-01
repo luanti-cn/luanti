@@ -8413,3 +8413,103 @@ msgstr "(c@#888)用法：/dm <好友名> <消息>"
 
 #~ msgid "When enabled, liquid reflections are simulated."
 #~ msgstr "启用时，会模拟液体反射。"
+
+#. Classic UI
+msgid "Cloud & Community"
+msgstr "云端与社区"
+
+#. Classic UI
+msgid "Options..."
+msgstr "选项…"
+
+#. Classic UI
+msgid "Quit Game"
+msgstr "退出游戏"
+
+#. Classic UI
+msgid "Free and open source"
+msgstr "自由开源，自在探索"
+
+#. Classic UI
+msgid "Play together. Make it yours."
+msgstr "一起玩耍，创造你的世界。"
+
+#. Classic UI
+msgid "Customize your game"
+msgstr "自定义游戏选项"
+
+#. Classic UI
+msgid "Sound & Music..."
+msgstr "音乐和声音…"
+
+#. Classic UI
+msgid "Video Settings..."
+msgstr "视频设置…"
+
+#. Classic UI
+msgid "Controls..."
+msgstr "控制…"
+
+#. Classic UI
+msgid "Client & Server..."
+msgstr "客户端与服务器…"
+
+#. Classic UI
+msgid "User Interface..."
+msgstr "界面设置…"
+
+#. Classic UI
+msgid "Accessibility..."
+msgstr "辅助功能…"
+
+#. Classic UI
+msgid "All Settings..."
+msgstr "全部设置…"
+
+#. Classic UI
+msgid "Install a game to start your adventure"
+msgstr "安装一个游戏，开始你的冒险"
+
+#. Classic UI
+msgid "Select World"
+msgstr "选择世界"
+
+#. Classic UI
+msgid "Play Selected World"
+msgstr "进入选中的世界"
+
+#. Classic UI
+msgid "Create New World"
+msgstr "创建新的世界"
+
+#. Classic UI
+msgid "World Options..."
+msgstr "世界选项…"
+
+#. Classic UI
+msgid "No worlds yet. Create your first world!"
+msgstr "还没有世界，创建你的第一个世界吧！"
+
+#. Classic UI
+msgid "Game Menu"
+msgstr "游戏菜单"
+
+#. Classic UI
+msgid "Back to Game"
+msgstr "回到游戏"
+
+#. Classic UI
+msgid "Save and Quit to Title"
+msgstr "保存并退回到标题画面"
+
+#. Classic UI
+msgid "Disconnect"
+msgstr "断开连接"
+
+#. Classic UI
+msgid "Join Server"
+msgstr "加入服务器"
+
+#. Classic UI
+msgid "Direct Connect"
+msgstr "直接连接"

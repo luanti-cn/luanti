@@ -24,6 +24,7 @@ dofile(menupath .. DIR_DELIM .. "async_event.lua")
 dofile(menupath .. DIR_DELIM .. "common.lua")
 dofile(menupath .. DIR_DELIM .. "serverlistmgr.lua")
 dofile(menupath .. DIR_DELIM .. "game_theme.lua")
+dofile(menupath .. DIR_DELIM .. "classic_ui.lua")
 dofile(menupath .. DIR_DELIM .. "content" .. DIR_DELIM .. "init.lua")
 
 dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
@@ -60,6 +61,10 @@ local tabs = {
 
 local function main_event_handler(tabview, event)
 	if event == "MenuQuit" then
+		if tabview.current_tab ~= "home" then
+			tabview:handle_buttons({classic_back = true})
+			return true
+		end
 		local show_dialog = core.settings:get_bool("enable_esc_dialog")
 		if not ui.childlist["mainmenu_quit_confirm"] and show_dialog then
 			tabview:hide()
@@ -120,7 +125,9 @@ local function init_globals()
 	-- Create main tabview
 	local tv_main = tabview_create("maintab", {x = MAIN_TAB_W, y = MAIN_TAB_H}, {x = 0, y = 0})
 
-	tv_main:set_autosave_tab(true)
+	tv_main:add(classic_ui.home_tab())
+	tv_main:add(classic_ui.community_tab())
+	tv_main:add(classic_ui.options_tab())
 	tv_main:add(tabs.local_game)
 	tv_main:add(tabs.play_online)
 	tv_main:add(tabs.cloud)
@@ -133,23 +140,8 @@ local function init_globals()
 	tv_main:set_global_event_handler(main_event_handler)
 	tv_main:set_fixed_size(false)
 
-	local last_tab = core.settings:get("maintab_LAST")
-	if last_tab and tv_main.current_tab ~= last_tab then
-		tv_main:set_tab(last_tab)
-	end
-
-	tv_main:set_end_button({
-		icon = defaulttexturedir .. "settings_btn.png",
-		label = fgettext("Settings"),
-		name = "open_settings",
-		on_click = function(tabview)
-			local dlg = create_settings_dlg()
-			dlg:set_parent(tabview)
-			tabview:hide()
-			dlg:show()
-			return true
-		end,
-	})
+	classic_ui.install(tv_main)
+	core.set_formspec_prepend(classic_ui.styles())
 
 	ui.set_default("maintab")
 	tv_main:show()

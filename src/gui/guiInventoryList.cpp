@@ -152,6 +152,26 @@ void GUIInventoryList::draw()
 
 		} else {
 			add_rectangle(true, hovering ? m_options.slotbg_h : m_options.slotbg_n, rect_clip);
+			// Only bevel the builtin slot palette. Mods retain their custom colors,
+			// borders, images and inventory geometry.
+			if (!m_options.slotborder &&
+					m_options.slotbg_n == video::SColor(255, 128, 128, 128) &&
+					m_options.slotbg_h == video::SColor(255, 192, 192, 192)) {
+				const s32 px = std::max(1, m_slot_size.X / 24);
+				auto edge = [&](video::SColor color, core::rect<s32> r) {
+					r.clipAgainst(AbsoluteClippingRect);
+					if (r.isValid() && r.getArea() > 0)
+						add_rectangle(true, color, r);
+				};
+				edge(video::SColor(255, 55, 55, 55), {rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+					rect.LowerRightCorner.X, rect.UpperLeftCorner.Y + px});
+				edge(video::SColor(255, 55, 55, 55), {rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+					rect.UpperLeftCorner.X + px, rect.LowerRightCorner.Y});
+				edge(video::SColor(255, 235, 235, 235), {rect.UpperLeftCorner.X, rect.LowerRightCorner.Y - px,
+					rect.LowerRightCorner.X, rect.LowerRightCorner.Y});
+				edge(video::SColor(255, 235, 235, 235), {rect.LowerRightCorner.X - px, rect.UpperLeftCorner.Y,
+					rect.LowerRightCorner.X, rect.LowerRightCorner.Y});
+			}
 		}
 
 		// Draw inv slot borders
