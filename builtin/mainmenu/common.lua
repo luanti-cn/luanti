@@ -270,9 +270,9 @@ function menu_worldmt_legacy(selected)
 end
 
 function confirmation_formspec(message, cancel_id, cancel_label, confirm_id, confirm_label)
-	return "size[10,2.5,true]" ..
-			"label[0.5,0.5;" .. message .. "]" ..
-			"style[" .. confirm_id .. ";bgcolor=red]" ..
-			"button[0.5,1.5;2.5,0.5;" .. cancel_id .. ";" .. cancel_label .. "]" ..
-			"button[7.0,1.5;2.5,0.5;" .. confirm_id .. ";" .. confirm_label .. "]"
+	local c = classic_ui.layout()
+	return c:formspec() .. "style_type[label;halign=center]" ..
+		c:label(0, c.h / 2 - 36, c.w, message) ..
+		c:button(c.w / 2 - 155, c.h / 2 + 4, 150, cancel_id, cancel_label) ..
+		c:button(c.w / 2 + 5, c.h / 2 + 4, 150, confirm_id, confirm_label)
 end

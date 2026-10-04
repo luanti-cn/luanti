@@ -243,7 +243,7 @@ local function create_world_formspec(dialogdata)
 		form = form .. ";" .. biometype.. "]"
 
 		-- biomeblend
-		y = y + 0.55
+		y = y + 1.0
 		form = form .. "checkbox[0,"..y..";flag_v6_biomeblend;" ..
 			-- TRANSLATORS: Smooth transition between biomes
 			fgettext("Biome blending") .. ";"..strflag(flags.v6, "biomeblend").."]" ..
@@ -257,73 +257,52 @@ local function create_world_formspec(dialogdata)
 	local y = y_start
 	local str_flags, str_spflags
 	local label_flags, label_spflags = "", ""
-	y = y + 0.3
+	y = y + 0.8
 	str_flags, y = mg_main_flags(current_mg, y)
 	if str_flags ~= "" then
 		label_flags = "label[0,"..y_start..";" .. fgettext("Mapgen flags") .. "]"
-		y_start = y + 0.4
+		y_start = y + 0.8
 	else
 		y_start = 0.0
 	end
-	y = y_start + 0.3
-	str_spflags = mg_specific_flags(current_mg, y)
+	y = y_start + 0.8
+	str_spflags, y = mg_specific_flags(current_mg, y)
 	if str_spflags ~= "" then
 		label_spflags = "label[0,"..y_start..";" .. fgettext("Mapgen-specific flags") .. "]"
 	end
 
-	local retval =
-		"formspec_version[6]size[15.5,9]padding[0.025,0.025]bgcolor[;neither]" ..
-		"style_type[label;halign=center]label[0,0.05;15.5,0.6;" .. fgettext("Create New World") .. "]" ..
-		"style_type[label;halign=left]" ..
-
-		-- Left side
-		"container[1.65,1.2]"..
-		"field[0,0.5;6,0.8;te_world_name;" ..
-		fgettext("World name") ..
-		";" .. core.formspec_escape(dialogdata.worldname) .. "]" ..
-		"set_focus[te_world_name;false]"
-
+	local c = classic_ui.layout()
+	local x = c.w / 2 - 155
+	local fs = {c:formspec(), c:header(fgettext("Create New World")),
+		c:label(x, 48, 150, fgettext("World name")),
+		c:rect("field", x, 64, 150, 20, "te_world_name;;" ..
+			core.formspec_escape(dialogdata.worldname)), "set_focus[te_world_name;false]"}
 	if not disallowed_mapgen_settings["seed"] then
-
-		retval = retval .. "field[0,2;6,0.8;te_seed;" ..
-				-- TRANSLATORS: Value for randomness
-				fgettext("Seed") ..
-				";".. core.formspec_escape(dialogdata.seed) .. "]"
-
+		fs[#fs + 1] = c:label(x, 94, 150, fgettext("Seed"))
+		fs[#fs + 1] = c:rect("field", x, 110, 150, 20, "te_seed;;" ..
+			core.formspec_escape(dialogdata.seed))
 	end
-
-	retval = retval ..
-		"label[0,3.15;" .. fgettext("Mapgen") .. "]"..
-		"dropdown[0,3.5;6,0.8;dd_mapgen;" .. mglist .. ";" .. selindex .. "]"
-
-	-- Warning when making a devtest world
+	fs[#fs + 1] = c:label(x, 140, 150, fgettext("Mapgen"))
+	fs[#fs + 1] = c:rect("dropdown", x, 156, 150, 20,
+		"dd_mapgen;" .. mglist .. ";" .. selindex)
 	if game.id == "devtest" then
-		retval = retval ..
-			"container[0,4.7]" ..
-			"box[0,0;5.8,1.7;#473824]" ..
-			"textarea[0.4,0.1;6,1.8;;;"..
-			fgettext("Development Test is meant for developers.") .. "]" ..
-			"button[1,1;4,0.5;world_create_open_cdb;" .. fgettext("Install another game") .. "]" ..
-			"container_end[]"
+		fs[#fs + 1] = c:label(x, 178, 150, fgettext("Development Test is meant for developers."))
+		fs[#fs + 1] = c:button(x, 190, 150, "world_create_open_cdb", fgettext("Install another game"))
 	end
-
-	retval = retval ..
-		"container_end[]" ..
-
-		-- Right side
-		"container[8.05,1.35]"..
-		label_flags .. str_flags ..
-		label_spflags .. str_spflags ..
-		"container_end[]"..
-
-		-- Menu buttons
-		"container[0,8.1]"..
-		"button[1.65,0;6,0.8;world_create_cancel;" .. fgettext("Cancel") .. "]" ..
-		"button[7.85,0;6,0.8;world_create_confirm;" .. fgettext("Create") .. "]" ..
-		"container_end[]"
-
-	return retval
-
+	local height = c.h - 100
+	local overflow = math.max(0, y * 20 + 16 - height)
+	if overflow > 0 then
+		fs[#fs + 1] = "scrollbaroptions[min=0;max=" .. math.ceil(overflow / 10) ..
+			";smallstep=1;largestep=6;thumbsize=" .. math.ceil(height / 10) .. "]"
+		fs[#fs + 1] = c:rect("scrollbar", x + 304, 48, 6, height, "vertical;create_flags_scroll;0")
+	end
+	fs[#fs + 1] = c:rect("scroll_container", x + 160, 48, 140, height,
+		"create_flags_scroll;vertical;" .. c.unit * 10)
+	fs[#fs + 1] = classic_ui.legacy(label_flags .. str_flags .. label_spflags .. str_spflags, c)
+	fs[#fs + 1] = "scroll_container_end[]"
+	fs[#fs + 1] = c:button(x, c.h - 28, 150, "world_create_cancel", fgettext("Cancel"))
+	fs[#fs + 1] = c:button(x + 160, c.h - 28, 150, "world_create_confirm", fgettext("Create"))
+	return table.concat(fs)
 end
 
 local function create_world_buttonhandler(this, fields)

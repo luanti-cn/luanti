@@ -13,6 +13,7 @@
 #include "IGUIFont.h"
 #include "irrlicht_changes/static_text.h"
 #include "porting.h"
+#include "filesys.h"
 #include "StyleSpec.h"
 #include "util/numeric.h"
 
@@ -258,7 +259,29 @@ void GUIButton::draw()
 	IGUISkin *skin = Environment->getSkin();
 	// END PATCH
 
-	if (DrawBorder) {
+	// Engine-owned widgets are local files, not game texture expressions.
+	video::ITexture *widget = nullptr;
+	if (DrawBorder && !ButtonImages[EGBIS_IMAGE_UP].Texture) {
+		const auto path = porting::getDataPath(
+				"textures" DIR_DELIM "base" DIR_DELIM "pack" DIR_DELIM "classic_button.png");
+		widget = driver->findTexture(path.c_str());
+		if (!widget) {
+			if (auto *image = driver->createImageFromFile(path.c_str())) {
+				widget = driver->addTexture(path.c_str(), image);
+				image->drop();
+			}
+		}
+	}
+	if (widget) {
+		const s32 y = !isEnabled() ? 40 : (hovered || focused ? 20 : 0);
+		const s32 px = std::max(1, (s32)std::round(AbsoluteRect.getHeight() / 20.0f));
+		video::SColor tint = BgColor;
+		if (Pressed)
+			tint = multiplyColorValue(tint, 0.85f);
+		const video::SColor colors[] = {tint, tint, tint, tint};
+		draw2DImage9Slice(driver, widget, AbsoluteRect, {0, y, 200, y + 20},
+				{2, 2, 198, 18}, &AbsoluteClippingRect, colors, px);
+	} else if (DrawBorder) {
 		// Hard, integer-aligned bevels rather than a desktop-widget gradient.
 		// Explicit formspec colors and image backgrounds still take precedence.
 		const s32 px = std::max(1, (s32)std::round(skin->getScale()));
@@ -288,6 +311,8 @@ void GUIButton::draw()
 	}
 
 	const core::position2di buttonCenter(AbsoluteRect.getCenter());
+	const auto text_color = OverrideColorEnabled ? OverrideColor : skin->getColor(EGDC_BUTTON_TEXT);
+	StaticText->setOverrideColor(isEnabled() ? text_color : skin->getColor(EGDC_GRAY_TEXT));
 	// PATCH
 	// The image changes based on the state, so we use the default every time.
 	EGUI_BUTTON_IMAGE_STATE imageState = EGBIS_IMAGE_UP;
@@ -722,11 +747,11 @@ void GUIButton::setFromStyle(const StyleSpec& style)
 	if (style.isNotDefault(StyleSpec::TEXTCOLOR)) {
 		setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR));
 	} else {
-		setOverrideColor(hovered ? video::SColor(255, 255, 255, 160) :
-				video::SColor(255, 255, 255, 255));
+		setOverrideColor(video::SColor(255, 255, 255, 255));
 		OverrideColorEnabled = false;
 	}
 	setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
+	setEnabled(style.getBool(StyleSpec::ENABLED, true));
 	setDrawBorder(style.getBool(StyleSpec::BORDER, true));
 	setUseAlphaChannel(style.getBool(StyleSpec::ALPHA, true));
 	setOverrideFont(style.getFont());

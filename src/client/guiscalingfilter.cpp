@@ -177,7 +177,7 @@ void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
 void draw2DImage9Slice(video::IVideoDriver *driver, video::ITexture *texture,
 		const core::rect<s32> &destrect, const core::rect<s32> &srcrect,
 		const core::rect<s32> &middlerect, const core::rect<s32> *cliprect,
-		const video::SColor *const colors)
+		const video::SColor *const colors, float border_scale)
 {
 	// `-x` is interpreted as `w - x`
 	core::rect<s32> middle = middlerect;
@@ -189,6 +189,12 @@ void draw2DImage9Slice(video::IVideoDriver *driver, video::ITexture *texture,
 
 	core::vector2di lower_right_offset = core::vector2di(srcrect.getWidth(),
 			srcrect.getHeight()) - middle.LowerRightCorner;
+	const core::vector2di upper_left_border(
+			std::round(middle.UpperLeftCorner.X * border_scale),
+			std::round(middle.UpperLeftCorner.Y * border_scale));
+	const core::vector2di lower_right_border(
+			std::round(lower_right_offset.X * border_scale),
+			std::round(lower_right_offset.Y * border_scale));
 
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
@@ -197,38 +203,38 @@ void draw2DImage9Slice(video::IVideoDriver *driver, video::ITexture *texture,
 
 			switch (x) {
 			case 0:
-				dest.LowerRightCorner.X = destrect.UpperLeftCorner.X + middle.UpperLeftCorner.X;
+				dest.LowerRightCorner.X = destrect.UpperLeftCorner.X + upper_left_border.X;
 				src.LowerRightCorner.X = srcrect.UpperLeftCorner.X + middle.UpperLeftCorner.X;
 				break;
 
 			case 1:
-				dest.UpperLeftCorner.X += middle.UpperLeftCorner.X;
-				dest.LowerRightCorner.X -= lower_right_offset.X;
+				dest.UpperLeftCorner.X += upper_left_border.X;
+				dest.LowerRightCorner.X -= lower_right_border.X;
 				src.UpperLeftCorner.X += middle.UpperLeftCorner.X;
 				src.LowerRightCorner.X -= lower_right_offset.X;
 				break;
 
 			case 2:
-				dest.UpperLeftCorner.X = destrect.LowerRightCorner.X - lower_right_offset.X;
+				dest.UpperLeftCorner.X = destrect.LowerRightCorner.X - lower_right_border.X;
 				src.UpperLeftCorner.X = srcrect.LowerRightCorner.X - lower_right_offset.X;
 				break;
 			}
 
 			switch (y) {
 			case 0:
-				dest.LowerRightCorner.Y = destrect.UpperLeftCorner.Y + middle.UpperLeftCorner.Y;
+				dest.LowerRightCorner.Y = destrect.UpperLeftCorner.Y + upper_left_border.Y;
 				src.LowerRightCorner.Y = srcrect.UpperLeftCorner.Y + middle.UpperLeftCorner.Y;
 				break;
 
 			case 1:
-				dest.UpperLeftCorner.Y += middle.UpperLeftCorner.Y;
-				dest.LowerRightCorner.Y -= lower_right_offset.Y;
+				dest.UpperLeftCorner.Y += upper_left_border.Y;
+				dest.LowerRightCorner.Y -= lower_right_border.Y;
 				src.UpperLeftCorner.Y += middle.UpperLeftCorner.Y;
 				src.LowerRightCorner.Y -= lower_right_offset.Y;
 				break;
 
 			case 2:
-				dest.UpperLeftCorner.Y = destrect.LowerRightCorner.Y - lower_right_offset.Y;
+				dest.UpperLeftCorner.Y = destrect.LowerRightCorner.Y - lower_right_border.Y;
 				src.UpperLeftCorner.Y = srcrect.LowerRightCorner.Y - lower_right_offset.Y;
 				break;
 			}

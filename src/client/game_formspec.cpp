@@ -20,6 +20,10 @@
 #include "gui/guiOpenURL.h"
 #include "gui/guiVolumeChange.h"
 #include "localplayer.h"
+#include "clientdynamicinfo.h"
+#include "settings.h"
+#include <cmath>
+#include <iomanip>
 
 /*
 	Text input system
@@ -377,28 +381,46 @@ void GameFormSpec::showPauseMenu()
 
 	auto simple_singleplayer_mode = m_client->m_simple_singleplayer_mode;
 
+	const auto window = ClientDynamicInfo::getCurrent();
+	const s32 fit = std::max(1, (s32)std::floor(std::min(
+			window.render_target_size.X / 320.0f, window.render_target_size.Y / 240.0f)));
+	const s32 scale = std::max(1, std::min(fit, (s32)std::floor(
+			fit * g_settings->getFloat("gui_scaling"))));
+	const s32 img = std::max(1, (s32)std::floor(
+			window.render_target_size.X / window.max_fs_size.X));
+	const double unit = (double)scale / img;
+	const double w = (double)window.render_target_size.X / scale;
+	const double h = (double)window.render_target_size.Y / scale;
+	const s32 font = std::max(1, (s32)std::round(8 * scale / window.real_gui_scaling));
 	std::ostringstream os;
-	os << "formspec_version[6]size[10,7.5]"
-		"bgcolor[;true;#00000070]"
-		"style_type[label;halign=center;valign=center]"
-		"label[0,0.2;10,0.8;" << strgettext("Game Menu") << "]"
-		"button_exit[1,1.6;8,0.8;btn_continue;" << strgettext("Back to Game") << "]"
-		"button[1,2.8;3.9,0.8;btn_settings;" << strgettext("Options...") << "]";
-
+	os << std::fixed << std::setprecision(8)
+		<< "formspec_version[6]size[" << (double)window.render_target_size.X / img - 0.000001
+		<< "," << (double)window.render_target_size.Y / img - 0.000001 << "]"
+		<< "position[0,0]anchor[0,0]padding[0,0]bgcolor[;true;#00000070]"
+		<< "style_type[label;halign=center;valign=center]"
+		<< "style_type[label,button,button_exit;font_size=" << font << "]"
+		<< "style_type[button,button_exit;content_offset=0,0]"
+		<< "label[0," << 40 * unit << ";" << w * unit << "," << 10 * unit
+		<< ";" << strgettext("Game Menu") << "]";
+	const double x = w / 2 - 100;
+	const double y = std::floor(h / 4) + 8;
+	auto button = [&](const char *type, double bx, double by, double width,
+			const char *id, const std::string &label) {
+		os << type << "[" << bx * unit << "," << by * unit << ";"
+			<< width * unit << "," << 20 * unit << ";" << id << ";" << label << "]";
+	};
+	button("button_exit", x, y, 200, "btn_continue", strgettext("Back to Game"));
+	button("button", x, y + 24, 98, "btn_settings", strgettext("Options..."));
 #if USE_SOUND && !defined(__ANDROID__)
-	os << "button[5.1,2.8;3.9,0.8;btn_sound;" << strgettext("Sound Volume") << "]";
+	button("button", x + 102, y + 24, 98, "btn_sound", strgettext("Sound Volume"));
 #else
-	os << "button_exit[5.1,2.8;3.9,0.8;btn_continue;" << strgettext("Continue") << "]";
+	button("button_exit", x + 102, y + 24, 98, "btn_continue", strgettext("Continue"));
 #endif
-
-	if (!simple_singleplayer_mode) {
-		os << "button[1,3.8;8,0.8;btn_change_password;"
-			<< strgettext("Change Password") << "]";
-	}
-
-	os << "button_exit[1,5.0;8,0.8;btn_exit_menu;"
-		<< strgettext(simple_singleplayer_mode ? "Save and Quit to Title" : "Disconnect") << "]"
-		<< "button_exit[1,6.0;8,0.8;btn_exit_os;" << strgettext("Quit Game") << "]";
+	if (!simple_singleplayer_mode)
+		button("button", x, y + 48, 200, "btn_change_password", strgettext("Change Password"));
+	button("button_exit", x, y + 72, 200, "btn_exit_menu",
+			strgettext(simple_singleplayer_mode ? "Save and Quit to Title" : "Disconnect"));
+	button("button_exit", x, y + 96, 200, "btn_exit_os", strgettext("Quit Game"));
 
 	if (!control_text.empty()) {
 		os << "tooltip[btn_continue;" << control_text << "]";
