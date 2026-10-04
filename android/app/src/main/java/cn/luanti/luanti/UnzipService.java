@@ -87,6 +87,8 @@ public class UnzipService extends IntentService {
 			}
 
 			unzip(notificationBuilder, zipFile, userDataDirectory);
+			if (!Utils.isInstallValid(this))
+				throw new IOException("Extracted assets are incomplete; required fonts or directories are missing");
 		} catch (IOException e) {
 			Log.w("UnzipService", null, e);
 			isSuccess = false;

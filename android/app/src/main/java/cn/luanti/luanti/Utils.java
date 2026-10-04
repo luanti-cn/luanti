@@ -37,6 +37,16 @@ public class Utils {
 
 	public static boolean isInstallValid(@NonNull Context context) {
 		File userDataDirectory = getUserDataDirectory(context);
+		String[] fonts = {
+			"BlockPixel-Regular.ttf", "DroidSansFallbackFull.ttf",
+			"Arimo-Regular.ttf", "Arimo-Bold.ttf", "Arimo-Italic.ttf", "Arimo-BoldItalic.ttf",
+			"Cousine-Regular.ttf", "Cousine-Bold.ttf", "Cousine-Italic.ttf", "Cousine-BoldItalic.ttf"
+		};
+		for (String font : fonts) {
+			File file = new File(userDataDirectory, "fonts/" + font);
+			if (!file.isFile() || file.length() == 0)
+				return false;
+		}
 		return userDataDirectory.isDirectory() &&
 			new File(userDataDirectory, "builtin").isDirectory() &&
 			new File(userDataDirectory, "client").isDirectory() &&
