@@ -321,17 +321,27 @@ gui::IGUIFont *FontEngine::initFont(FontSpec spec)
 	else
 		path_setting = setting_prefix + "font_path" + setting_suffix;
 
+	std::string bundled_font = "DroidSansFallbackFull.ttf";
+	if (spec.mode != _FM_Fallback) {
+		bundled_font = spec.mode == FM_Mono ? "Cousine" : "Arimo";
+		bundled_font += spec.bold
+				? (spec.italic ? "-BoldItalic.ttf" : "-Bold.ttf")
+				: (spec.italic ? "-Italic.ttf" : "-Regular.ttf");
+	}
+
 	std::string fallback_settings[] = {
 		g_settings->get(path_setting),
-		Settings::getLayer(SL_DEFAULTS)->get(path_setting)
+		Settings::getLayer(SL_DEFAULTS)->get(path_setting),
+		porting::getDataPath(("fonts" DIR_DELIM + bundled_font).c_str())
 	};
 	for (const std::string &font_path : fallback_settings) {
 		infostream << "Creating new font: " << font_path.c_str()
 				<< " " << size << "pt" << std::endl;
 
 		if (auto *face = getOrLoadFace(font_path)) {
-			return createFont(face, font_path == porting::getDataPath(
-					"fonts" DIR_DELIM "BlockPixel-Regular.ttf"));
+			if (auto *font = createFont(face, font_path == porting::getDataPath(
+						"fonts" DIR_DELIM "BlockPixel-Regular.ttf")))
+				return font;
 		}
 
 		errorstream << "FontEngine: Cannot load '" << font_path <<
