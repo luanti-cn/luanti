@@ -49,10 +49,6 @@ android {
 		}
 	}
 
-	compileOptions {
-		sourceCompatibility JavaVersion.VERSION_1_8
-		targetCompatibility JavaVersion.VERSION_1_8
-	}
 	namespace 'cn.luanti.luanti'
 }
 
@@ -134,5 +130,5 @@ clean {
 
 dependencies {
 	implementation project(':native')
-	implementation 'androidx.appcompat:appcompat:1.6.1'
+	implementation 'androidx.appcompat:appcompat:1.7.1'
 }
