@@ -767,7 +767,7 @@ void ChatPrompt::clampView()
 
 ChatBackend::ChatBackend():
 	m_console_buffer(1500),
-	m_recent_buffer(6),
+	m_recent_buffer(10),
 	m_prompt(L"]", 1500)
 {
 	m_prompt.setChatBuffer(&m_console_buffer);

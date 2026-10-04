@@ -197,7 +197,9 @@ void GameUI::setChatText(const EnrichedString &chat_text, u32 recent_chat_count)
 void GameUI::updateChatSize()
 {
 	// Update gui element size and position
-	s32 chat_y = 5;
+	const s32 font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
+	const s32 padding = std::max(10, font_height / 2);
+	s32 chat_y = padding;
 
 	if (m_flags.show_minimal_debug)
 		chat_y += m_guitext->getTextHeight();
@@ -206,9 +208,18 @@ void GameUI::updateChatSize()
 
 	const v2u32 window_size = RenderingEngine::getWindowSize();
 
-	core::rect<s32> chat_size(10, chat_y, window_size.X - 20, 0);
-	chat_size.LowerRightCorner.Y = std::min((s32)window_size.Y,
-			m_guitext_chat->getTextHeight() + chat_y);
+	core::rect<s32> chat_size(padding, chat_y,
+			std::max(padding + 1, (s32)window_size.X - padding),
+			std::max(chat_y, (s32)window_size.Y - padding));
+
+	// Apply the new width before measuring the wrapped text after a resize.
+	if (chat_size.getWidth() != m_current_chat_size.getWidth())
+		m_guitext_chat->setRelativePosition(chat_size);
+
+	// Leave room for descenders and the pixel font's shadow on the final line.
+	chat_size.LowerRightCorner.Y = std::max(chat_y,
+			std::min((s32)window_size.Y - padding,
+					m_guitext_chat->getTextHeight() + chat_y + padding));
 
 	if (chat_size == m_current_chat_size)
 		return;
