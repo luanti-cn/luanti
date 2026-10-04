@@ -194,6 +194,7 @@ protected:
 	video::SColor m_background = video::SColor(255, 0, 0, 0);
 	video::SColor m_highlight = video::SColor(255, 70, 100, 50);
 	video::SColor m_highlight_text = video::SColor(255, 255, 255, 255);
+	video::SColor m_highlight_border = video::SColor(0, 0, 0, 0);
 	s32 m_rowheight = 1;
 	float m_rowheight_factor = 1.0f;
 	gui::IGUIFont *m_font = nullptr;

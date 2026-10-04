@@ -93,10 +93,13 @@ local function get_disabled_settings(game)
 end
 
 local function get_formspec(tabview, name, tabdata)
+	local c = classic_ui.layout()
+	local x = c.w / 2 - 155
 	if #pkgmgr.games == 0 then
 		return "style_type[label;halign=center]" ..
-			"label[0,1.5;15.5,1;" .. fgettext("Install a game to start your adventure") .. "]" ..
-			"button[3.75,3.5;8,0.8;game_open_cdb;" .. fgettext("Install a game") .. "]"
+			c:label(0, 80, c.w, fgettext("Install a game to start your adventure")) ..
+			c:button(c.w / 2 - 100, 112, 200, "game_open_cdb", fgettext("Install a game")) ..
+			c:button(c.w / 2 - 100, c.h - 28, 200, "classic_back", fgettext("Cancel"))
 	end
 
 	local games, game_index = {}, 1
@@ -111,7 +114,7 @@ local function get_formspec(tabview, name, tabdata)
 	for i, world in ipairs(menudata.worldlist:get_list()) do
 		local game = pkgmgr.find_by_gameid(world.gameid)
 		-- Use a world's optional icon without ever requiring one.
-		local icon = defaulttexturedir .. "no_screenshot.png"
+		local icon = defaulttexturedir .. "classic_world.png"
 		for _, filename in ipairs(core.get_dir_list(world.path, false)) do
 			if filename == "icon.png" then icon = world.path .. DIR_DELIM .. filename end
 		end
@@ -120,21 +123,24 @@ local function get_formspec(tabview, name, tabdata)
 		rows[#rows + 1] = core.formspec_escape(world.name .. "\n" ..
 			(game and game.title or world.gameid))
 	end
+	local valid_selection = index > 0 and #rows > 0
 	local fs = {
-		"dropdown[1.65,0.15;12.2,0.7;classic_game;", table.concat(games, ","), ";", game_index, ";true]",
-		"tableoptions[rowheight=3;background=#171310;border=false;highlight=#444444]",
-		"tablecolumns[image,padding=0.7", #image_options > 0 and "," or "",
+		c:rect("dropdown", x + 5, 30, 300, 20, "classic_game;" .. table.concat(games, ",") .. ";" .. game_index .. ";true"),
+		c:rect("box", 0, 54, c.w, c.h - 118, "#00000090"),
+		"tableoptions[rowheight=3.5;background=#00000000;border=false;highlight=#000000;highlight_border=#808080]",
+		"tablecolumns[image,padding=0.3", #image_options > 0 and "," or "",
 			table.concat(image_options, ","), ";text,padding=1]",
-		"table[1.65,1.05;12.2,3.8;sp_worlds;", table.concat(rows, ","), ";", index, "]",
-		"button[1.65,5.05;6,0.8;play;", fgettext("Play Selected World"), "]",
-		"button[7.85,5.05;6,0.8;world_create;", fgettext("Create New World"), "]",
-		"button[1.65,6.05;3.9,0.8;world_configure;", fgettext("Select Mods"), "]",
-		"button[5.8,6.05;3.9,0.8;world_options;", fgettext("World Options..."), "]",
-		"button[9.95,6.05;3.9,0.8;world_delete;", fgettext("Delete"), "]",
+		c:rect("table", x + 2, 56, 306, c.h - 122, "sp_worlds;" .. table.concat(rows, ",") .. ";" .. index),
+		c:button(x + 5, c.h - 52, 150, "play", fgettext("Play Selected World"), valid_selection),
+		c:button(x + 160, c.h - 52, 150, "world_create", fgettext("Create New World")),
+		c:button(x + 5, c.h - 28, 72, "world_configure", fgettext("Select Mods"), valid_selection),
+		c:button(x + 82, c.h - 28, 72, "world_options", fgettext("World Options..."), valid_selection),
+		c:button(x + 159, c.h - 28, 72, "world_delete", fgettext("Delete"), valid_selection),
+		c:button(x + 236, c.h - 28, 72, "classic_back", fgettext("Cancel")),
 	}
 	if #rows == 0 then
-		fs[#fs + 1] = "style_type[label;halign=center]label[1.65,2;12.2,1;" ..
-			fgettext("No worlds yet. Create your first world!") .. "]"
+		fs[#fs + 1] = "style_type[label;halign=center]" .. c:label(0, 80, c.w,
+			fgettext("No worlds yet. Create your first world!"))
 	end
 	return table.concat(fs)
 end
@@ -399,6 +405,7 @@ end
 --------------------------------------------------------------------------------
 return {
 	name = "local",
+	classic_pixels = true,
 	caption = fgettext("Select World"),
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,

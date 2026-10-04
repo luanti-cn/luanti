@@ -28,13 +28,12 @@ return {
 		}
 
 		if not info then
-			table.insert_all(fs, {
-				"label[0.5,1.7;",
-				fgettext("After pairing with a luanti.cn account:\\n· Server credentials are fetched/created automatically, no manual registration\\n· Characters are managed in the cloud and survive device changes\\n· See friends' online status and join their server in one click"), "]",
-				"button[0.5,4.3;3,0.8;cloud_browser;", fgettext("Open Website"), "]",
-				"button[4,4.3;3,0.8;cloud_pair;", fgettext("Enter Pairing Code"), "]",
-			})
-			return table.concat(fs)
+			return classic_ui.account_prompt(
+				fgettext("After pairing with a luanti.cn account:\\n" ..
+					"· Server credentials are fetched/created automatically, no manual registration\\n" ..
+					"· Characters are managed in the cloud and survive device changes\\n" ..
+					"· See friends' online status and join their server in one click"),
+				"cloud_pair", "cloud_browser")
 		end
 
 		table.insert_all(fs, {
