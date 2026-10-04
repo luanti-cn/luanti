@@ -26,7 +26,9 @@ local function pair_formspec(dialogdata)
 	end
 	table.insert_all(retval, {
 		"label[0.375,1.4;",
-		fgettext("1. Open $1 in your browser and log in\\n2. Go to the \"Cloud Sync -> Devices\" page to generate a pairing code (valid for 10 minutes)\\n3. Enter the 8-character pairing code below",
+		fgettext("1. Open $1 in your browser and log in\\n" ..
+				"2. Go to the \"Cloud Sync -> Devices\" page to generate a pairing code (valid for 10 minutes)\\n" ..
+				"3. Enter the 8-character pairing code below",
 				cloud_api.site_url()), "]",
 		"field[0.375,3.1;7.25,0.8;code;",
 		fgettext("Pairing code (e.g. ABCD-EF23)"), ";",
@@ -69,7 +71,8 @@ local function pair_buttonhandler(this, fields)
 		this.data.code = fields.code or ""
 		local code = normalize_code(fields.code)
 		if not code then
-			this.data.error = fgettext("Invalid pairing code: expected 8 alphanumeric characters, optionally hyphenated (e.g. ABCD-EF23)")
+			this.data.error = fgettext("Invalid pairing code: expected 8 alphanumeric characters, " ..
+					"optionally hyphenated (e.g. ABCD-EF23)")
 			return true
 		end
 

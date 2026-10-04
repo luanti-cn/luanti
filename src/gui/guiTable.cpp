@@ -182,6 +182,8 @@ void GUITable::setTable(const TableOptions &options,
 			parseColorString(value, m_highlight, false);
 		else if (name == "highlight_text")
 			parseColorString(value, m_highlight_text, false);
+		else if (name == "highlight_border")
+			parseColorString(value, m_highlight_border, false);
 		else if (name == "opendepth")
 			opendepth = stoi(value);
 		else if (name == "rowheight") {
@@ -496,6 +498,7 @@ void GUITable::clear()
 	m_background     = skin->getColor(gui::EGDC_3D_HIGH_LIGHT);
 	m_highlight      = skin->getColor(gui::EGDC_HIGH_LIGHT);
 	m_highlight_text = skin->getColor(gui::EGDC_HIGH_LIGHT_TEXT);
+	m_highlight_border = video::SColor(0, 0, 0, 0);
 
 	// Reset members
 	m_rowheight_factor = 1.0f;
@@ -702,6 +705,21 @@ void GUITable::draw()
 
 		if (is_sel) {
 			skin->draw2DRectangle(this, m_highlight, row_rect, &client_clip);
+			if (m_highlight_border.getAlpha() > 0) {
+				const s32 px = m_font ? std::max(1U, m_font->getDimension(L"M").Height / 8) : 1;
+				auto r = row_rect;
+				r.LowerRightCorner.Y = r.UpperLeftCorner.Y + px;
+				skin->draw2DRectangle(this, m_highlight_border, r, &client_clip);
+				r = row_rect;
+				r.UpperLeftCorner.Y = r.LowerRightCorner.Y - px;
+				skin->draw2DRectangle(this, m_highlight_border, r, &client_clip);
+				r = row_rect;
+				r.LowerRightCorner.X = r.UpperLeftCorner.X + px;
+				skin->draw2DRectangle(this, m_highlight_border, r, &client_clip);
+				r = row_rect;
+				r.UpperLeftCorner.X = r.LowerRightCorner.X - px;
+				skin->draw2DRectangle(this, m_highlight_border, r, &client_clip);
+			}
 			color = m_highlight_text;
 		}
 

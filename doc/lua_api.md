@@ -3707,6 +3707,8 @@ Elements
     * highlight background color (`ColorString`), defaults to `#466432`
 * `highlight_text=#RRGGBB`
     * highlight text color (`ColorString`), defaults to `#FFFFFF`
+* LuantiCN extension: `highlight_border=#RRGGBB`
+    * Optional outline for the selected row, default transparent.
 * `opendepth=<value>`
     * all subtrees up to `depth < value` are open (default value = `0`)
     * only useful when there is a column of type "tree"
@@ -3940,6 +3942,8 @@ Some types may inherit styles from parent types.
       * `+<number>`/`-<number>`: Offsets default font size by `number` points.
       * `*<number>`: Multiplies default font size by `number`, similar to CSS `em`.
     * border - boolean, draw border. Set to false to hide the bevelled button pane. Default true.
+    * enabled - LuantiCN extension: boolean, allow mouse and keyboard activation.
+      Default true. Disabled buttons show the disabled texture and text color.
     * content_offset - 2d vector, shifts the position of the button's content without resizing it.
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
     * padding - rect, adds space between the edges of the button and the content. This value is

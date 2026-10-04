@@ -87,6 +87,12 @@ describe("classic navigation", function()
 		assert.is_not.equal("", view:get_formspec())
 	end)
 
+	it("wraps legacy cloud messages with real line breaks", function()
+		local fs = classic_ui.account_prompt("First\\\\nSecond\\;value", "pair", "browser")
+		assert.is_truthy(fs:find("First\nSecond\\;value", 1, true))
+		assert.is_falsy(fs:find("\\\\n", 1, true))
+	end)
+
 	it("returns from connection details to the server list before the title screen", function()
 		view:handle_buttons({nav_online = true})
 		view.tablist[view.last_tab_index].tabdata.show_connect = true
@@ -95,6 +101,36 @@ describe("classic navigation", function()
 		assert.is_false(view.tablist[view.last_tab_index].tabdata.show_connect)
 		view:handle_buttons({classic_back = true})
 		assert.equal("home", view.current_tab)
+	end)
+
+	it("keeps the title controls and corner text in the viewport at different raster scales", function()
+		for _, size in ipairs({{1280, 720, 3}, {800, 600, 2}, {1280, 600, 2}, {1920, 1080, 4}}) do
+			core.get_window_info = function()
+				return {size = {x = size[1], y = size[2]},
+					max_formspec_size = {x = size[1] / 53.328, y = size[2] / 53.328},
+					real_gui_scaling = 1}
+			end
+			local c = classic_ui.layout()
+			assert.equal(size[3], c.scale)
+			local fs = view:get_formspec()
+			assert.is_truthy(fs:find("position[0,0]anchor[0,0]", 1, true))
+			assert.is_falsy(fs:find("nav_language;@", 1, true))
+			assert.is_falsy(fs:find("nav_accessibility;A]", 1, true))
+			for x, y, w, h in fs:gmatch("button%[([%d%.%-]+),([%d%.%-]+);([%d%.%-]+),([%d%.%-]+);") do
+				assert.is_true(tonumber(x) >= 0 and tonumber(y) >= 0)
+				assert.is_true((tonumber(x) + tonumber(w)) / c.unit <= c.w)
+				assert.is_true((tonumber(y) + tonumber(h)) / c.unit <= c.h)
+			end
+		end
+	end)
+
+	it("converts legacy geometry without changing escaped labels or submitted field values", function()
+		local c = classic_ui.layout()
+		local fs = classic_ui.legacy("field[1,2;3,1;test;;a\\]b\\;1,2]" ..
+			"table[1,2;3,4;servers;0,1,2;3]style[test;enabled=false]", c)
+		assert.is_truthy(fs:find(";test;;a\\]b\\;1,2]", 1, true))
+		assert.is_truthy(fs:find(";servers;0,1,2;3]", 1, true))
+		assert.is_truthy(fs:find("style[test;enabled=false]", 1, true))
 	end)
 end)
 

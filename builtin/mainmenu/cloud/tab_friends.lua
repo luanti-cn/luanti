@@ -29,13 +29,10 @@ local function make_formspec(tabdata)
 	local fs = {}
 
 	if not info then
-		table.insert_all(fs, {
-			"label[0.5,1;", fgettext("Friends / DMs / Party"), "]",
-			"label[0.5,1.7;",
-			fgettext("After pairing with a luanti.cn account, you can see friends, exchange DMs,\\njoin friends' local games in one click, and use party follow."), "]",
-			"button[0.5,3.6;3,0.8;cloudfr_pair;", fgettext("Enter Pairing Code"), "]",
-			"button[4,3.6;3,0.8;cloudfr_browser;", fgettext("Open Website"), "]",
-		})
+		fs[1] = classic_ui.account_prompt(
+			fgettext("After pairing with a luanti.cn account, you can see friends, exchange DMs,\\n" ..
+				"join friends' local games in one click, and use party follow."),
+			"cloudfr_pair", "cloudfr_browser")
 		if cloud_social.notice then
 			table.insert_all(fs, {
 				"label[0.5,5.1;", core.formspec_escape(cloud_social.notice), "]",

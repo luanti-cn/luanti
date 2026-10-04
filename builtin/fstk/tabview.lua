@@ -25,6 +25,7 @@ local function add_tab(self,tab)
 	local newtab = {
 		name = tab.name,
 		caption = tab.caption,
+		classic_pixels = tab.classic_pixels,
 		button_handler = tab.cbf_button_handler,
 		event_handler = tab.cbf_events,
 		get_formspec = tab.cbf_formspec,
