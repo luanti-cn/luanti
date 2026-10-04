@@ -126,7 +126,7 @@ void CloudConfig::saveAuth(const AuthInfo &info)
 		root["defaultServerUsername"] = info.defaultServerUsername;
 
 	std::string path = authFilePath();
-	std::string dir = path.substr(0, path.find_last_of(DIR_DELIM));
+	std::string dir = path.substr(0, path.find_last_of(DIR_DELIM_CHAR));
 	if (!fs::CreateAllDirs(dir)) {
 		errorstream << "Cloud: cannot create " << dir << std::endl;
 		return;

@@ -50,8 +50,9 @@
 
 - CMake / Ninja 客户端构建通过：`RUN_IN_PLACE=ON`、`ENABLE_SOUND=ON`、`BUILD_UNITTESTS=ON`。
 - `./bin/luanti --run-unittests`：50 个模块、351 项检查通过；Catch2 9 个用例通过。
-- `busted builtin --lua=luajit`：159 项通过，包括 12 项菜单回归规格。
-- `luacheck builtin`：修改文件无警告，另有 5 条既有云端代码警告。
+- `busted builtin --lua=lua5.1` 与 `busted builtin --lua=luajit`：各 159 项通过，包括 12 项菜单回归规格。
+- `luacheck builtin`：118 个文件，0 警告、0 错误；devtest 检查：93 个文件，0 警告、0 错误。
+- `CLANG_TIDY=clang-tidy-15 ./util/ci/clang-tidy.sh`：按仓库 CI 配置完整扫描通过，退出码 0。
 - 18 个生成资源重建后 SHA-256 一致，`git diff --check` 通过。
 - 实机检查 1280×720、800×600、1280×600 的标题布局、背景覆盖与窗口切换。
 - 世界选择、创建和删除确认、单人游戏启动、暂停与背包、设置入口、多人与社区页面的返回流程已检查。

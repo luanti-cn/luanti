@@ -30,7 +30,8 @@ local function make_formspec(tabdata)
 
 	if type(party) ~= "table" or not party.code then
 		table.insert_all(fs, {
-			"label[0.5,1.4;", fgettext("Form a party with friends; the leader picks the server and everyone joins in one click."), "]",
+			"label[0.5,1.4;", fgettext("Form a party with friends; " ..
+					"the leader picks the server and everyone joins in one click."), "]",
 			"button[0.5,2.6;2.6,0.8;cloudparty_create;", fgettext("Create Party"), "]",
 			"field[3.5,2.7;3,0.8;cloudparty_code;;]",
 			"button[6.7,2.6;2.6,0.8;cloudparty_join;", fgettext("Join by Party Code"), "]",

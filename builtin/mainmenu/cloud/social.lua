@@ -27,14 +27,11 @@ local function clear_notice()
 	end
 end
 
-local handled_dms = {}
-
 local function handle_event(ev)
 	local data = ev.data
 	if ev.type == "dm.new" then
 		cloud_social.notify(fgettext_ne("DM from $1: $2",
 				data.fromDisplay or data.from, data.body or ""))
-		handled_dms[data.from] = true
 	elseif ev.type == "friend.request" then
 		cloud_social.pending_requests[data.from] = data.fromDisplay or data.from
 		cloud_social.notify(fgettext_ne("$1 sent you a friend request, please handle it on the website",
@@ -44,8 +41,6 @@ local function handle_event(ev)
 		cloud_social.notify(fgettext_ne("You are now friends with $1",
 				data.displayName or data.username))
 		core.cloud_refresh()
-	elseif ev.type == "presence" then
-		-- friends list refresh is cheap enough on visibility change only
 	elseif ev.type == "party.update" then
 		cloud_social.notify(fgettext("Party info updated"))
 	elseif ev.type == "party.error" then
