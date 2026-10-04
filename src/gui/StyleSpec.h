@@ -25,6 +25,7 @@ public:
 		BGCOLOR_PRESSED, // Note: Deprecated property
 		NOCLIP,
 		BORDER,
+		ENABLED,
 		BGIMG,
 		BGIMG_HOVERED, // Note: Deprecated property
 		BGIMG_MIDDLE,
@@ -81,6 +82,8 @@ public:
 			return NOCLIP;
 		} else if (name == "border") {
 			return BORDER;
+		} else if (name == "enabled") {
+			return ENABLED;
 		} else if (name == "bgimg") {
 			return BGIMG;
 		} else if (name == "bgimg_hovered") {

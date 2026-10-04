@@ -87,6 +87,7 @@ local function find_selected_server()
 end
 
 local function get_formspec(tabview, name, tabdata)
+	local c = classic_ui.layout()
 	-- Update the cached supported proto info,
 	-- it may have changed after a change by the settings menu.
 	common_update_cached_supp_proto()
@@ -97,7 +98,7 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		-- Search
-		"field[1.65,0.15;9.95,0.75;te_search;;" .. core.formspec_escape(tabdata.search_for) .. "]" ..
+		"field[0.25,-0.1;12,1;te_search;;" .. core.formspec_escape(tabdata.search_for) .. "]" ..
 		"tooltip[te_search;" .. core.formspec_escape(table.concat({
 				fgettext("Possible filters"),
 				"game:<name>",
@@ -106,10 +107,10 @@ local function get_formspec(tabview, name, tabdata)
 				"sort:[-](name|relevance|players|mods|uptime|ping|lag)",
 		}, "\n")) .. "]" ..
 		"field_enter_after_edit[te_search;true]" ..
-		"container[11.6,0.15]" ..
-		"image_button[0,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "search.png") .. ";btn_mp_search;]" ..
-		"image_button[0.75,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "clear.png") .. ";btn_mp_clear;]" ..
-		"image_button[1.5,0;0.75,0.75;" .. core.formspec_escape(defaulttexturedir .. "refresh.png") .. ";btn_mp_refresh;]" ..
+		"container[12.25,-0.1]" ..
+		"image_button[0,0;1,1;" .. core.formspec_escape(defaulttexturedir .. "search.png") .. ";btn_mp_search;]" ..
+		"image_button[1,0;1,1;" .. core.formspec_escape(defaulttexturedir .. "clear.png") .. ";btn_mp_clear;]" ..
+		"image_button[2,0;1,1;" .. core.formspec_escape(defaulttexturedir .. "refresh.png") .. ";btn_mp_refresh;]" ..
 		"tooltip[btn_mp_clear;" .. fgettext("Clear") .. "]" ..
 		"tooltip[btn_mp_search;" .. fgettext("Search") .. "]" ..
 		-- TRANSLATORS: As in 'reload'/'check again'
@@ -229,7 +230,8 @@ local function get_formspec(tabview, name, tabdata)
 	local split = assert(retval:find("container[9.75,0]", 1, true))
 	local search_fs = retval:sub(1, split - 1)
 	local connection_fs = retval:sub(split):gsub("container%[9%.75,0%]", "container[4.875,0]")
-	retval = search_fs .. "tableoptions[rowheight=2.5;background=#171310;border=false;highlight=#444444]"
+	retval = search_fs .. "tableoptions[rowheight=3.5;background=#00000000;border=false;" ..
+		"highlight=#000000;highlight_border=#808080]"
 
 	-- Table
 	retval = retval .. "tablecolumns[" ..
@@ -259,7 +261,7 @@ local function get_formspec(tabview, name, tabdata)
 		"align=inline,padding=0.25,width=1.5;" ..
 		"color,align=inline,span=1;" ..
 		"text,align=inline,padding=1]" ..
-		"table[1.65,1.15;12.2,4.4;servers;"
+		("table[0.125,1.1;15.25,%f;servers;"):format((c.h - 118) / 20)
 
 	local servers = get_sorted_servers()
 
@@ -302,8 +304,10 @@ local function get_formspec(tabview, name, tabdata)
 	if tabdata.show_connect then
 		return connection_fs
 	end
-	retval = retval .. "button[1.65,5.8;6,0.8;btn_show_connect;" .. fgettext("Join Server") .. "]" ..
-		"button[7.85,5.8;6,0.8;btn_direct_connect;" .. fgettext("Direct Connect") .. "]"
+	local y = (c.h - 84) / 20
+	retval = retval .. "style[btn_show_connect;enabled=" .. tostring(selected_server ~= nil) .. "]" ..
+		("button[0.25,%f;7.5,1;btn_show_connect;%s]"):format(y, fgettext("Join Server")) ..
+		("button[8,%f;7.5,1;btn_direct_connect;%s]"):format(y, fgettext("Direct Connect"))
 	return retval
 end
 

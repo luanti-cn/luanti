@@ -277,10 +277,11 @@ gui::IGUIFont *FontEngine::initFont(FontSpec spec)
 
 	auto createFont = [&](gui::SGUITTFace *face, bool pixel = false) -> gui::CGUITTFont* {
 		const u32 raster_size = pixel ? std::max(8U, (u32)std::round(size / 8.0f) * 8) : size;
+		const u32 shadow = pixel ? font_shadow * raster_size / 8 : font_shadow;
 		// Integer-sized pixel outlines stay crisp in the standard 32-bit atlas.
 		// The monochrome 16-bit atlas is unreliable on some OpenGL drivers.
 		auto *font = gui::CGUITTFont::createTTFont(m_env,
-				face, raster_size, true, spec.mode != _FM_Fallback, font_shadow,
+				face, raster_size, true, spec.mode != _FM_Fallback, shadow,
 				font_shadow_alpha);
 
 		if (!font)

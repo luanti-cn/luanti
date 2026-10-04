@@ -1629,7 +1629,9 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 	}
 
 	if (!spec.flabel.empty()) {
-		int font_height = g_fontengine->getTextHeight();
+		auto *font = style.getFont();
+		int font_height = font ? font->getDimension(spec.flabel.c_str()).Height :
+				g_fontengine->getTextHeight();
 		rect.UpperLeftCorner.Y -= font_height;
 		rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + font_height;
 		addLabel(EnrichedString(spec.flabel.c_str()), rect, data->current_parent, style);

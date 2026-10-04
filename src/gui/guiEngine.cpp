@@ -502,12 +502,16 @@ void GUIEngine::drawBackground(video::IVideoDriver *driver)
 	) / 2;
 	if (m_textures[TEX_LAYER_BACKGROUND].panorama) {
 		// Slow drift within the image's overscan; never expose an empty edge.
-		bg_size.X *= 1.04f;
-		bg_size.Y *= 1.04f;
-		const float phase = porting::getTimeMs() * 0.00008f;
+		bg_size.X = std::ceil(bg_size.X * 1.04);
+		bg_size.Y = std::ceil(bg_size.Y * 1.04);
+		// Bound both the time value and movement: aspect-ratio cropping must
+		// not turn into a large sideways sweep on narrow windows.
+		const double phase = (porting::getTimeMs() % 180000) * (6.283185307179586 / 180000);
+		const s32 drift = std::min(((s32)bg_size.X - (s32)screensize.X) / 2,
+				(s32)std::round(screensize.X * 0.02));
 		offset.X = ((s32)screensize.X - (s32)bg_size.X) / 2;
 		offset.Y = ((s32)screensize.Y - (s32)bg_size.Y) / 2;
-		offset.X += std::sin(phase) * ((s32)bg_size.X - (s32)screensize.X) / 2;
+		offset.X += std::lround(std::sin(phase) * drift);
 	}
 	/* Draw background texture */
 	draw2DImageFilterScaled(driver, texture,
@@ -638,8 +642,12 @@ bool GUIEngine::setTexture(texture_layer layer, const std::string &texturepath,
 	m_textures[layer].texture = m_texture_source->getTexture(texturepath);
 	m_textures[layer].tile    = tile_image;
 	m_textures[layer].minsize = minsize;
-	m_textures[layer].panorama = texturepath == porting::getDataPath(
-			"textures" DIR_DELIM "base" DIR_DELIM "pack" DIR_DELIM "classic_panorama.png");
+	// Lua provides a canonical path, while a run-in-place share path may still
+	// contain "bin/..". Compare resolved paths to recognize the same resource.
+	const std::string panorama_path = fs::AbsolutePath(porting::getDataPath(
+			"textures" DIR_DELIM "base" DIR_DELIM "pack" DIR_DELIM "classic_panorama.png"));
+	m_textures[layer].panorama = !panorama_path.empty() &&
+			fs::AbsolutePath(texturepath) == panorama_path;
 
 	return m_textures[layer].texture != nullptr;
 }
