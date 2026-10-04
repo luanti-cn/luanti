@@ -946,7 +946,7 @@ hud_hotbar_max_width (Maximum hotbar width) float 1.0 0.001 1.0
 [**Chat]
 
 #    Maximum number of recent chat messages to show
-recent_chat_messages (Recent Chat Messages) int 6 2 20
+recent_chat_messages (Recent Chat Messages) int 10 2 20
 
 #    In-game chat console height, between 0.1 (10%) and 1.0 (100%).
 console_height (Console height) float 0.6 0.1 1.0
