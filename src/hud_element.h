@@ -42,7 +42,8 @@
 #define HUD_HOTBAR_ITEMCOUNT_DEFAULT 9
 #define HUD_HOTBAR_ITEMCOUNT_MAX     32
 
-#define HOTBAR_IMAGE_SIZE 32
+// Games position custom hotbar backgrounds and adjacent HUD elements using this size.
+#define HOTBAR_IMAGE_SIZE 48
 
 enum HudElementType {
 	HUD_ELEM_IMAGE     = 0,

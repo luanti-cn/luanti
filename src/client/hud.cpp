@@ -142,7 +142,7 @@ void Hud::readScalingSetting()
 	m_hotbar_imagesize = std::floor(HOTBAR_IMAGE_SIZE *
 		RenderingEngine::getDisplayDensity() + 0.5f);
 	m_hotbar_imagesize *= m_hud_scaling;
-	m_padding = m_hotbar_imagesize / 8;
+	m_padding = m_hotbar_imagesize / 12;
 }
 
 Hud::~Hud()
@@ -990,10 +990,7 @@ void Hud::resizeHotbar() {
 	const v2u32 &window_size = RenderingEngine::getWindowSize();
 
 	if (m_screensize != window_size) {
-		m_hotbar_imagesize = floor(HOTBAR_IMAGE_SIZE *
-			RenderingEngine::getDisplayDensity() + 0.5);
-		m_hotbar_imagesize *= m_hud_scaling;
-		m_padding = m_hotbar_imagesize / 8;
+		readScalingSetting();
 		m_screensize = window_size;
 		m_displaycenter = v2s32(m_screensize.X/2,m_screensize.Y/2);
 	}

@@ -153,6 +153,9 @@ local function scale_to_hud_max(player, field)
 	return math.ceil(current / max_display * nominal)
 end
 
+-- Keep stat icons above the 48px hotbar items and their selection border.
+local statbar_y = -(48 + 18 + 16)
+
 register_builtin_hud_element("health", {
 	elem_def = {
 		type = "statbar",
@@ -163,7 +166,7 @@ register_builtin_hud_element("health", {
 		item = core.PLAYER_MAX_HP_DEFAULT,
 		direction = 0,
 		size = {x = 18, y = 18},
-		offset = {x = -180, y = -64},
+		offset = {x = -180, y = statbar_y},
 	},
 	events = {"properties_changed", "health_changed"},
 	show_elem = function(player, flags)
@@ -194,7 +197,7 @@ register_builtin_hud_element("breath", {
 		item = core.PLAYER_MAX_BREATH_DEFAULT * 2,
 		direction = 0,
 		size = {x = 18, y = 18},
-		offset = {x = 0, y = -64},
+		offset = {x = 0, y = statbar_y},
 	},
 	events = {"properties_changed", "breath_changed"},
 	show_elem = function(player, flags, id)
